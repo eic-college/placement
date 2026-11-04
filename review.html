@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EICC | Review Placement Report</title>
+<style>
+:root{--ink:#111827;--muted:#4a5468;--brand:#060c2c;--brand-dark:#1d2a5c;--navy:#060c2c;--line:#dde2ec;--input:#a3acc2;--bg:#f4f6fa;--error:#b42336;--error-bg:#fff0f1;--ok-bg:#eef1f8;--focus:#2563eb}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.top{background:#fff;border-top:6px solid var(--navy)}
+.top-inner{max-width:860px;margin:auto;padding:18px 20px;display:flex;align-items:center;justify-content:center;gap:22px}
+.top img{width:92px;height:auto;flex:none}
+.college{text-align:center;color:var(--navy)}
+.college p{margin:2px 0 0;font-size:15px;color:#1f2940}
+.college .college-name{margin:0 0 4px;font-size:26px;font-weight:800;line-height:1.2;color:var(--navy)}
+.college a{color:inherit}
+.page-bar{background:var(--navy);color:#fff;text-align:center;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:8px 12px}
+main{max-width:860px;margin:0 auto;padding:26px 20px 48px}
+h1{font-size:clamp(25px,4vw,33px);line-height:1.15;margin:0 0 8px;letter-spacing:-.02em}
+.lead{color:var(--muted);margin:0 0 20px}
+.panel{border:1px solid var(--line);border-radius:16px;background:#fff;padding:22px;margin:0 0 16px;box-shadow:0 12px 40px rgba(6,12,44,.07)}
+.panel h2{font-size:19px;margin:0 0 14px}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 20px;margin:0}
+.facts dt{font-size:13px;color:var(--muted)}
+.facts dd{margin:2px 0 0;font-weight:700;overflow-wrap:anywhere}
+.big{font-size:26px;color:var(--brand)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#4a5468}
+td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+th.num{text-align:right}
+tr.off td{color:#6b7487}
+.tag{display:inline-block;font-size:11px;font-weight:700;color:#7a5a00;background:#fff7d6;border-radius:6px;padding:1px 6px;margin-left:4px}
+.text{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7fb;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.notice{border-radius:12px;padding:14px 16px;margin:0 0 16px}
+.notice.warn{background:#fffbeb;border:2px solid #d97706}
+.notice.error{background:var(--error-bg);border:1px solid #fac1c7;color:#921d30}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{font-size:19px;font-weight:700;margin:0 0 12px;padding:0}
+.choice{display:flex;gap:12px;align-items:flex-start;padding:13px 14px;border:1px solid var(--line);border-radius:10px;margin:0 0 9px;cursor:pointer}
+.choice:has(input:checked){border-color:var(--brand);background:#eef1fa}
+.choice input{width:20px;height:20px;margin:2px 0 0;flex:none;accent-color:var(--brand)}
+.issue{background:#f7f8fc;border:1px solid var(--line);border-radius:10px;padding:16px;margin:8px 0 0}
+label.lbl{display:block;font-weight:700;font-size:14px;margin:14px 0 6px}
+input.ctl,textarea{width:100%;min-height:46px;padding:10px 12px;border:1.5px solid var(--input);border-radius:9px;background:#fff}
+textarea{min-height:110px;resize:vertical}
+.hint{font-size:13px;color:var(--muted);margin:6px 0 0}
+.field-error{color:var(--error);font-size:14px;font-weight:600;margin:6px 0 0}
+[aria-invalid="true"]{border-color:var(--error)!important;box-shadow:0 0 0 2px #ffd9de}
+.btn{width:100%;min-height:50px;border:0;border-radius:10px;background:var(--brand);color:#fff;font-weight:750;font-size:16px;margin-top:18px;cursor:pointer}
+.btn:hover{background:var(--brand-dark)}
+.btn:disabled{opacity:.6;cursor:wait}
+.done{text-align:center}
+.done .mark{width:58px;height:58px;border-radius:50%;background:#e8ebf5;color:var(--brand-dark);display:grid;place-items:center;font-size:28px;margin:0 auto 12px}
+footer{text-align:center;font-size:13px;color:#4a5468}
+footer a{color:var(--brand)}
+@media(max-width:600px){.top-inner{flex-direction:column;gap:8px;padding:14px}.top img{width:76px}.college .college-name{font-size:21px}.college p{font-size:14px}main{padding:18px 14px 40px}.panel{padding:16px}.facts{grid-template-columns:1fr}th:nth-child(2),td:nth-child(2){display:none}}
+</style>
+<script>
+var EICC_API_URL = "https://script.google.com/macros/s/AKfycbyo6z8T6QMewbmDpTnDYKA7zNMfiUbucxkR-xtDmfTp-uqYz-SoHoL2GX8PvQXhRBMy/exec";
+/* google.script.run for pages hosted outside Google: the same calls go to the Public
+   Portal's doPost as plain JSON, without cookies, so the visitor's Google accounts
+   never matter. EICC_API_URL is set by scripts/build-site.js. */
+window.google = { script: { run: (function () {
+  function runner(ok, fail) {
+    return new Proxy({}, { get: function (_, fn) {
+      if (fn === 'withSuccessHandler') return function (h) { return runner(h, fail); };
+      if (fn === 'withFailureHandler') return function (h) { return runner(ok, h); };
+      return function () {
+        var args = Array.prototype.slice.call(arguments);
+        var failed = function (message) { if (fail) fail({ message: message }); };
+        fetch(EICC_API_URL, { method: 'POST', body: JSON.stringify({ fn: fn, args: args }), credentials: 'omit', redirect: 'follow' })
+          .then(function (res) { return res.json(); })
+          .then(function (reply) {
+            if (reply && Object.prototype.hasOwnProperty.call(reply, 'error')) return failed(reply.error);
+            if (ok) ok(reply ? reply.result : null);
+          }, function () { failed('We could not reach EICC. Please check your internet connection and try again.'); });
+      };
+    } });
+  }
+  return runner();
+})() } };
+</script>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <img src="data:image/png;base64,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" alt="Excellence Imperial Career College logo">
+    <div class="college">
+      <p class="college-name">Excellence Imperial Career College</p>
+      <p>2442 St Joseph Boulevard, Unit 102, Ottawa, K1C 1G1</p>
+      <p>613-900-4473, <a href="mailto:info@eiccollege.ca">info@eiccollege.ca</a></p>
+    </div>
+  </div>
+  <div class="page-bar">Placement Supervisor Review</div>
+</header>
+<main id="main"><p class="lead">Loading the placement report…</p></main>
+<script>
+function eiccWireReview(token) {
+  'use strict';
+  var TOKEN = token;
+  var $ = function (id) { return document.getElementById(id); };
+  var form = $('review-form'), issue = $('issue'), disc = $('discrepancies');
+  var FIELDS = ['reviewed', 'hoursAccurate', 'activitiesAccurate', 'notes', 'correctedTotal', 'signature'];
+  disc.addEventListener('change', function () { issue.hidden = !disc.checked; if (disc.checked) $('notes').focus(); });
+  function show(errors) {
+    var first = null;
+    FIELDS.forEach(function (f) {
+      var el = $(f), err = $(f + '-error'); if (!el || !err) return;
+      var e = errors.filter(function (x) { return x.field === f; })[0];
+      err.textContent = e ? e.message : ''; err.hidden = !e;
+      el.setAttribute('aria-invalid', e ? 'true' : 'false');
+      if (e && !first) first = el;
+    });
+    if (first) first.focus();
+  }
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var btn = $('submit'), formError = $('form-error');
+    formError.hidden = true;
+    var act = $('activitiesAccurate');
+    var payload = { token: TOKEN, reviewed: $('reviewed').checked, hoursAccurate: $('hoursAccurate').checked,
+      activitiesAccurate: act ? act.checked : true, discrepancies: disc.checked,
+      verifiedTotalHours: $('correctedTotal').value, discrepancyNotes: $('notes').value, supervisorSignature: $('signature').value };
+    btn.disabled = true; btn.textContent = 'Submitting…';
+    google.script.run.withSuccessHandler(function (r) {
+      btn.disabled = false; btn.textContent = 'Submit Review';
+      if (!r.ok) return show(r.errors || []);
+      $('done-text').textContent = r.discrepancies
+        ? 'EICC has received your comments. The student will be asked to correct the log, and you will receive the corrected version to review.'
+        : 'EICC has received your signed verification. No further action is needed.';
+      $('review-content').hidden = true; $('done').hidden = false; $('done').focus(); window.scrollTo(0, 0);
+    }).withFailureHandler(function (err) {
+      btn.disabled = false; btn.textContent = 'Submit Review';
+      formError.textContent = (err && err.message) || 'Your review could not be submitted. Please try again.'; formError.hidden = false;
+    }).submitSupervisorReview(payload);
+  });
+}
+
+/* Supervisor review page outside Google: loads the review by token, renders the same
+   markup as apps/portal/Review.html, then wires the form (eiccWireReview, built from
+   Review.html's own script). Every value is escaped before it is placed in the page. */
+(function () {
+  'use strict';
+  var esc = function (s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+  var main = document.getElementById('main');
+  var token = new URLSearchParams(location.search).get('token') || '';
+  function footer(email) {
+    return '<footer>Questions? Contact EICC Placements' + (email ? ' at <a href="mailto:' + esc(email) + '">' + esc(email) + '</a>' : '') + '.</footer>';
+  }
+  function fail(message, email) {
+    main.innerHTML = '<h1>Review Placement Report</h1><div class="notice error" role="alert"><strong>We couldn\'t open this review.</strong><br>' +
+      esc(message) + '</div>' + footer(email);
+  }
+  function render(v, email) {
+    var days = v.days.map(function (d) {
+      return '<tr class="' + (d.worked ? '' : 'off') + '">' +
+        '<th scope="row" style="text-transform:none;letter-spacing:0;font-size:15px;color:inherit">' + esc(d.day) + '</th>' +
+        '<td>' + esc(d.date) + '</td>' +
+        '<td>' + (d.worked ? esc(d.start) + ' – ' + esc(d.end) : 'Not worked') + '</td>' +
+        '<td class="num">' + (d.worked ? esc(d.hours) : '—') + '</td></tr>';
+    }).join('');
+    main.innerHTML =
+      '<div id="review-content">' +
+      '<h1>Review Placement Report</h1>' +
+      '<p class="lead">Please check this student\'s hours and activities for the week, then confirm them or tell us what needs to change.</p>' +
+      (v.previousComments ? '<div class="notice warn"><strong>This is a corrected log.</strong> Your earlier comments were:<div class="text" style="margin-top:8px">' + esc(v.previousComments) + '</div></div>' : '') +
+      '<section class="panel" aria-labelledby="sum-h"><h2 id="sum-h">Student Profile</h2><dl class="facts">' +
+      '<div><dt>Name</dt><dd>' + esc(v.studentName) + '</dd></div>' +
+      '<div><dt>Hours Reported</dt><dd class="big">' + esc(v.total) + ' hours</dd></div>' +
+      '<div><dt>Placement Location</dt><dd>' + esc(v.placementSite) + '</dd></div>' +
+      '<div><dt>Week</dt><dd>Week ' + esc(v.weekNumber) + ': ' + esc(v.week) + '</dd></div></dl></section>' +
+      '<section class="panel" aria-labelledby="log-h"><h2 id="log-h">Hours Reported</h2><table>' +
+      '<thead><tr><th scope="col">Day</th><th scope="col">Date</th><th scope="col">Shift</th><th scope="col" class="num">Hours</th></tr></thead>' +
+      '<tbody>' + days + '</tbody></table></section>' +
+      (v.weeklySummary ? '<section class="panel" aria-labelledby="ws-h"><h2 id="ws-h">Weekly Summary of Activities</h2><div class="text">' + esc(v.weeklySummary) + '</div></section>' : '') +
+      (v.zeroReason ? '<section class="panel" aria-labelledby="zr-h"><h2 id="zr-h">Reason for No Placement Hours</h2><div class="text">' + esc(v.zeroReason) + '</div></section>' : '') +
+      '<section class="panel" aria-labelledby="decl-h"><h2 id="decl-h">Student Declaration</h2><p style="margin:0">' + esc(v.declaration) +
+      '<br><span class="hint">Signed: ' + esc(v.signature) + '</span></p></section>' +
+      '<section class="panel" aria-labelledby="confirm-h"><h2 id="confirm-h" class="vh">Check All That Apply</h2><form id="review-form" novalidate>' +
+      '<fieldset><legend>Check All That Apply</legend>' +
+      '<label class="choice"><input type="checkbox" id="reviewed" aria-describedby="reviewed-error"><span>I have reviewed the student\'s weekly placement log.</span></label>' +
+      '<p class="field-error" id="reviewed-error" hidden></p>' +
+      '<label class="choice"><input type="checkbox" id="hoursAccurate" aria-describedby="hoursAccurate-error"><span>The hours recorded accurately reflect the student\'s placement attendance.</span></label>' +
+      '<p class="field-error" id="hoursAccurate-error" hidden></p>' +
+      (v.total > 0 ? '<label class="choice"><input type="checkbox" id="activitiesAccurate" aria-describedby="activitiesAccurate-error"><span>The activities recorded are consistent with the student\'s placement activities.</span></label>' +
+        '<p class="field-error" id="activitiesAccurate-error" hidden></p>' : '') +
+      '<label class="choice"><input type="checkbox" id="discrepancies" aria-controls="issue"><span>Something needs to be corrected (the student will be asked to fix it).</span></label>' +
+      '</fieldset>' +
+      '<div class="issue" id="issue" hidden>' +
+      '<label class="lbl" for="notes">What Needs to Be Corrected?</label>' +
+      '<textarea id="notes" maxlength="3000" aria-describedby="notes-hint notes-error"></textarea>' +
+      '<p class="hint" id="notes-hint">The student will see these comments.</p><p class="field-error" id="notes-error" hidden></p>' +
+      '<label class="lbl" for="correctedTotal">Hours You Can Verify</label>' +
+      '<input class="ctl" id="correctedTotal" type="number" inputmode="decimal" min="0" max="168" step="0.01" value="' + esc(v.total) + '" aria-describedby="correctedTotal-error" style="max-width:200px">' +
+      '<p class="field-error" id="correctedTotal-error" hidden></p></div>' +
+      '<label class="lbl" for="signature">Type Your Full Name to Sign</label>' +
+      '<input class="ctl" id="signature" autocomplete="name" maxlength="160" aria-describedby="signature-hint signature-error">' +
+      '<p class="hint" id="signature-hint">Signature</p><p class="field-error" id="signature-error" hidden></p>' +
+      '<p class="field-error" id="form-error" role="alert" hidden></p>' +
+      '<button class="btn" id="submit" type="submit">Submit Review</button></form></section></div>' +
+      '<section class="panel done" id="done" hidden tabindex="-1" aria-labelledby="done-h"><div class="mark" aria-hidden="true">✓</div>' +
+      '<h2 id="done-h">Thank you. Your review has been submitted.</h2><p id="done-text"></p><p class="hint">You can close this page.</p></section>' +
+      footer(email);
+    eiccWireReview(token);
+  }
+  google.script.run.withSuccessHandler(function (r) {
+    if (r.error) return fail(r.error, r.collegeEmail);
+    render(r.view, r.collegeEmail);
+  }).withFailureHandler(function (err) {
+    fail((err && err.message) || 'This review could not be loaded. Please try again.');
+  }).getSupervisorReview(token);
+})();
+</script>
+</body>
+</html>

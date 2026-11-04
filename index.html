@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EICC | Weekly Placement Report</title>
+<style>
+:root{--ink:#111827;--muted:#4a5468;--brand:#060c2c;--brand-dark:#1d2a5c;--navy:#060c2c;--line:#dde2ec;--input:#a3acc2;--bg:#f4f6fa;--error:#b42336;--error-bg:#fff0f1;--ok-bg:#edfaf4;--focus:#2563eb;--shadow:0 12px 40px rgba(6,12,44,.07)}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:-9999px;top:0;background:#fff;padding:12px;z-index:10}.skip:focus{left:12px}
+.top{background:#fff;border-top:6px solid var(--navy)}
+.top-inner{max-width:980px;margin:auto;padding:18px 20px;display:flex;align-items:center;justify-content:center;gap:22px}
+.top img{width:92px;height:auto;flex:none}
+.college{text-align:center;color:var(--navy)}
+.college p{margin:2px 0 0;font-size:15px;color:#1f2940}
+.college .college-name{margin:0 0 4px;font-size:26px;font-weight:800;line-height:1.2;color:var(--navy)}
+.college a{color:inherit}
+.page-bar{background:var(--navy);color:#fff;text-align:center;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:8px 12px}
+main{max-width:980px;margin:0 auto;padding:28px 20px 48px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--brand);margin:0 0 6px}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.15;letter-spacing:-.03em;margin:0 0 8px}
+.lead{color:var(--muted);margin:0 0 22px;max-width:65ch}
+.panel{border:1px solid var(--line);border-radius:16px;background:#fff;padding:24px;box-shadow:var(--shadow);margin:0 0 18px}
+.panel h2{font-size:19px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+.step{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#e8ebf5;color:var(--brand-dark);font-size:13px;font-weight:800;flex:none}
+.desc{color:var(--muted);font-size:14px;margin:0 0 18px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.field label,.label{display:block;font-size:14px;font-weight:700;margin:0 0 6px}
+.field input,.field select,textarea{width:100%;min-height:46px;padding:10px 12px;border:1.5px solid var(--input);border-radius:9px;background:#fff}
+textarea{min-height:150px;resize:vertical}
+.hint{font-size:13px;color:var(--muted);margin:6px 0 0}
+.field-error{color:var(--error);font-size:14px;font-weight:600;margin:6px 0 0}
+.field-error::before,.shift-error::before{content:"⚠ ";speak:never}
+[aria-invalid="true"]{border-color:var(--error)!important;box-shadow:0 0 0 2px #ffd9de}
+.btn{border:0;border-radius:10px;background:var(--brand);color:#fff;font-weight:750;padding:12px 20px;min-height:48px;cursor:pointer}
+.btn:hover{background:var(--brand-dark)}
+.btn.secondary{background:#fff;color:var(--brand-dark);border:1.5px solid var(--brand)}
+.btn.link{background:none;color:var(--brand-dark);text-decoration:underline;padding:4px;min-height:0}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.row-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-top:16px}
+.row-actions .field{flex:1 1 180px;max-width:240px}
+.notice{border-radius:10px;padding:12px 14px;font-size:14px;margin:14px 0 0}
+.notice.info{background:#eef6ff;border:1px solid #c7ddf7}
+.notice.ok{background:var(--ok-bg);border:1px solid #bde2d0;color:#0b5644}
+.notice.error{background:var(--error-bg);border:1px solid #fac1c7;color:#921d30}
+.verified{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;background:var(--ok-bg);border:1px solid #bde2d0;border-radius:12px;padding:14px 16px}
+.verified strong{display:block}
+.verified span{font-size:14px;color:#2f5d55}
+.week-range{display:inline-block;margin-top:8px;background:#e8ebf5;color:#060c2c;border-radius:8px;padding:4px 10px;font-size:14px;font-weight:700}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer}
+.check input{width:20px;height:20px;margin:2px 0 0;flex:none;accent-color:var(--brand)}
+.zero-field{display:flex;flex-direction:column;justify-content:flex-end}
+.field .zero-check{display:flex;gap:10px;font-weight:400;font-size:15px;margin:0;min-height:46px;align-items:center;border:1.5px dashed #b6bfd3;border-radius:9px;padding:10px 12px}
+.row-gap{margin-top:16px}
+#shifts-panel.is-off #shift-table{opacity:.45;filter:grayscale(1);pointer-events:none}
+.day-head,.day-row{display:grid;grid-template-columns:150px minmax(0,1fr) minmax(0,1fr) 112px;gap:14px;align-items:center}
+.day-head{padding:0 14px 6px;color:#4a5468;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:800}
+.day-row{border:1px solid #dde2ec;border-radius:11px;padding:10px 14px;margin:0 0 8px;background:#fff}
+.day-row:focus-within{border-color:#8f99b8;box-shadow:0 0 0 2px #e8ebf5}
+.day-row.off{background:#f6f7fa}
+.day-name{font-weight:750;font-size:15px}
+.day-date{display:block;font-size:13px;color:#4a5468}
+.day-input label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.day-input input{width:100%;min-width:0;height:44px;padding:8px 10px;border:1.5px solid var(--input);border-radius:8px;background:#fff}
+.day-input input:disabled{background:#eef0f5;border-color:#d5dae6}
+.field input:disabled{background:#eef0f5;border-color:#d5dae6;color:#4a5468}
+.day-hours{text-align:right;font-variant-numeric:tabular-nums;font-weight:800;color:#060c2c;font-size:15px;line-height:1.2}
+.tag{display:block;font-size:11px;font-weight:700;color:#7a5a00;letter-spacing:.02em}
+.row-clear{font-size:12px;padding:2px 0;margin-top:2px}
+.shift-error{grid-column:2/-1;color:var(--error);font-size:14px;font-weight:600;margin:-2px 0 0}
+.total{margin:14px 0 0;padding:16px 18px;background:var(--navy);color:#fff;border-radius:11px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.total small{display:block;color:#c9cfe3;font-size:12px}
+.total output{font-size:26px;font-weight:850;white-space:nowrap}
+.counter{font-size:12px;color:var(--muted);text-align:right;margin:4px 0 0}
+.summary-box{border:2px solid var(--error);border-radius:12px;padding:14px 18px;background:var(--error-bg);margin:0 0 16px}
+.summary-box h3{margin:0 0 6px;font-size:16px;color:#921d30}
+.summary-box ul{margin:0;padding-left:20px}
+.summary-box a{color:#921d30;font-weight:600}
+.review{border:2px solid var(--brand);border-radius:12px;padding:18px;background:#f5f7fb;margin-top:16px}
+.review h3{margin:0 0 10px}
+.review dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0 0 14px;font-size:15px}
+.review dt{color:var(--muted)}
+.review dd{margin:0;font-weight:650}
+.correction{margin-top:12px;border:2px solid #d97706;background:#fffbeb;border-radius:12px;padding:14px 16px}
+.correction h3{margin:0 0 6px;font-size:16px}
+.correction blockquote{margin:8px 0;padding:8px 12px;background:#fff;border-left:4px solid #d97706;white-space:pre-wrap}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+.done{border:2px solid #3aa577;background:var(--ok-bg)}
+.done code{font-size:14px;background:#fff;padding:2px 6px;border-radius:6px;word-break:break-all}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+footer{text-align:center;font-size:12px;color:#4a5468;margin-top:20px}
+@media(max-width:760px){.day-head,.day-row{grid-template-columns:96px minmax(0,1fr) minmax(0,1fr) 74px;gap:8px}.day-row{padding:10px}.day-hours{font-size:14px}}
+@media(max-width:560px){.top-inner{flex-direction:column;gap:8px;padding:14px}.top img{width:76px}.college .college-name{font-size:21px}.college p{font-size:14px}main{padding:20px 14px 40px}.panel{padding:16px;border-radius:13px}.grid2{grid-template-columns:1fr}
+ .day-head{display:none}.day-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 64px;gap:6px 8px}
+ .day-title{grid-column:1/-1;display:flex;gap:10px;align-items:baseline}.day-date{display:inline}.row-clear{margin-left:auto}
+ .day-input label{position:static;width:auto;height:auto;clip:auto;white-space:normal;font-size:12px;color:var(--muted);font-weight:650;margin:0 0 3px}
+ .day-input input{padding:6px 4px 6px 8px;font-size:15px}.day-hours{align-self:end;padding-bottom:12px;font-size:13px}.shift-error{grid-column:1/-1}
+ .total output{font-size:22px}.actions .btn,.row-actions .btn{width:100%}.row-actions .field{max-width:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+<script>
+var EICC_API_URL = "https://script.google.com/macros/s/AKfycbyo6z8T6QMewbmDpTnDYKA7zNMfiUbucxkR-xtDmfTp-uqYz-SoHoL2GX8PvQXhRBMy/exec";
+/* google.script.run for pages hosted outside Google: the same calls go to the Public
+   Portal's doPost as plain JSON, without cookies, so the visitor's Google accounts
+   never matter. EICC_API_URL is set by scripts/build-site.js. */
+window.google = { script: { run: (function () {
+  function runner(ok, fail) {
+    return new Proxy({}, { get: function (_, fn) {
+      if (fn === 'withSuccessHandler') return function (h) { return runner(h, fail); };
+      if (fn === 'withFailureHandler') return function (h) { return runner(ok, h); };
+      return function () {
+        var args = Array.prototype.slice.call(arguments);
+        var failed = function (message) { if (fail) fail({ message: message }); };
+        fetch(EICC_API_URL, { method: 'POST', body: JSON.stringify({ fn: fn, args: args }), credentials: 'omit', redirect: 'follow' })
+          .then(function (res) { return res.json(); })
+          .then(function (reply) {
+            if (reply && Object.prototype.hasOwnProperty.call(reply, 'error')) return failed(reply.error);
+            if (ok) ok(reply ? reply.result : null);
+          }, function () { failed('We could not reach EICC. Please check your internet connection and try again.'); });
+      };
+    } });
+  }
+  return runner();
+})() } };
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header class="top">
+  <div class="top-inner">
+    <img src="data:image/png;base64,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" alt="Excellence Imperial Career College logo">
+    <div class="college">
+      <p class="college-name">Excellence Imperial Career College</p>
+      <p>2442 St Joseph Boulevard, Unit 102, Ottawa, K1C 1G1</p>
+      <p>613-900-4473, <a href="mailto:info@eiccollege.ca">info@eiccollege.ca</a></p>
+    </div>
+  </div>
+  <div class="page-bar">Student Placement Portal</div>
+</header>
+<main id="main">
+  <input type="hidden" id="batch-id" value="">
+  <p class="eyebrow" id="batch-name">Loading your placement batch…</p>
+  <h1>Weekly Placement Report</h1>
+  <p class="lead">Enter your name and email, enter your shifts for one week, and write one summary of your activities. Your hours are calculated as you type.</p>
+  <div id="page-error" class="notice error" role="alert" hidden></div>
+
+  <form id="placement-form" novalidate>
+  <!-- STEP 1: identity -->
+  <section class="panel" aria-labelledby="id-title" id="identity">
+    <h2 id="id-title"><span class="step" aria-hidden="true">1</span>Personal Verification</h2>
+    <p class="desc">Enter your name and college email exactly as you registered with EICC.</p>
+    <div id="identity-entry">
+      <div class="grid2">
+        <div class="field"><label for="student-name">First Name/Last Name</label>
+          <input id="student-name" autocomplete="name" maxlength="160" aria-describedby="student-name-error">
+          <p class="field-error" id="student-name-error" hidden></p></div>
+        <div class="field"><label for="student-email">Your College Email</label>
+          <input id="student-email" type="email" autocomplete="email" inputmode="email" maxlength="254" aria-describedby="student-email-error">
+          <p class="field-error" id="student-email-error" hidden></p></div>
+      </div>
+      <div class="row-actions"><button type="button" class="btn" id="sign-in">Continue</button></div>
+      <p class="field-error" id="identity-error" hidden></p>
+    </div>
+    <div id="identity-done" hidden>
+      <div class="verified" role="status" tabindex="-1" id="verified-card">
+        <div><strong>✓ Signed In: <span id="v-name"></span></strong><span id="v-detail"></span></div>
+        <button type="button" class="btn link" id="change-identity">Not You? Use Different Details</button>
+      </div>
+      <div id="corrections"></div>
+    </div>
+  </section>
+
+  <fieldset id="log-fields">
+  <!-- STEP 2: week -->
+  <section class="panel" aria-labelledby="week-title">
+    <h2 id="week-title"><span class="step" aria-hidden="true">2</span>Weekly Report</h2>
+    <div id="correction-banner" class="notice info" hidden><span id="correction-text"></span> <button type="button" class="btn link" id="cancel-correction">Cancel Correction</button></div>
+    <div class="grid2">
+      <div class="field"><label for="week-number">Select The Week</label>
+        <select id="week-number" aria-describedby="week-number-error"><option value="">Select Week</option></select>
+        <p class="field-error" id="week-number-error" hidden></p></div>
+      <div class="field zero-field">
+        <label class="check zero-check"><input type="checkbox" id="zero-week" aria-describedby="zero-week-error"><span>I did not work this week</span></label>
+        <p class="field-error" id="zero-week-error" hidden></p></div>
+    </div>
+    <div class="grid2 row-gap">
+      <div class="field"><label for="last-worked">Date</label>
+        <input id="last-worked" type="date" aria-describedby="last-worked-error">
+        <p class="field-error" id="last-worked-error" hidden></p>
+        <span class="week-range" id="week-range" hidden></span></div>
+    </div>
+    <div id="zero-area" class="row-gap" hidden>
+      <div class="field"><label for="zero-reason">Reason for Zero Placement Hours</label>
+        <textarea id="zero-reason" rows="3" maxlength="3000" aria-describedby="zero-reason-hint zero-reason-error"></textarea>
+        <p class="hint" id="zero-reason-hint">For example: illness, placement closed, no shifts scheduled.</p>
+        <p class="field-error" id="zero-reason-error" hidden></p></div>
+    </div>
+  </section>
+
+  <!-- STEP 3: shifts (greyed out for a week with no hours) -->
+  <section class="panel" aria-labelledby="hours-title" id="shifts-panel">
+    <h2 id="hours-title"><span class="step" aria-hidden="true">3</span>Your Shifts</h2>
+    <p class="desc">Enter Your Start and End Times Only</p>
+    <p class="notice info" id="shifts-off-note" hidden>Not needed: you marked this week as having no placement hours.</p>
+    <div id="shift-table">
+      <div class="day-head" aria-hidden="true"><span>Day</span><span>Start Time</span><span>End Time</span><span style="text-align:right">Hours</span></div>
+      <div id="day-list"></div>
+      <p class="field-error" id="shifts-error" hidden></p>
+      <div class="total"><div>Weekly Total<small>Calculated From Your Shifts</small></div><output id="weekly-total" aria-live="polite">0h 00m</output></div>
+    </div>
+  </section>
+
+  <!-- STEP 4: weekly summary -->
+  <section class="panel" aria-labelledby="summary-title" id="summary-panel">
+    <h2 id="summary-title"><span class="step" aria-hidden="true">4</span>Provide a Summary of Activities for This Week</h2>
+    <div class="field"><label for="weekly-summary">Provide Your Summary of Activities</label>
+      <textarea id="weekly-summary" rows="7" maxlength="10000" aria-describedby="weekly-summary-error"></textarea>
+      <p class="counter" id="summary-count" aria-hidden="true"></p>
+      <p class="field-error" id="weekly-summary-error" hidden></p></div>
+  </section>
+
+  <!-- STEP 5: declaration -->
+  <section class="panel" aria-labelledby="confirm-title">
+    <h2 id="confirm-title"><span class="step" aria-hidden="true">5</span>Type Your Full Name To Sign</h2>
+    <label class="check"><input type="checkbox" id="declaration" aria-describedby="declaration-error"><span>I confirm that my reported hours and activities are accurate.</span></label>
+    <p class="field-error" id="declaration-error" hidden></p>
+    <div class="field" style="margin-top:16px;max-width:460px"><label for="signature">Signature</label>
+      <input id="signature" autocomplete="name" maxlength="160" aria-describedby="signature-error">
+      <p class="field-error" id="signature-error" hidden></p></div>
+    <div id="error-summary" class="summary-box" role="alert" tabindex="-1" hidden style="margin-top:18px">
+      <h3>Please Fix the Following</h3><ul id="error-list"></ul></div>
+    <div class="actions" id="submit-actions"><button type="submit" class="btn" id="review-button">Review and Submit</button></div>
+    <div id="review" class="review" hidden>
+      <h3 id="review-title" tabindex="-1">Check Before You Submit</h3>
+      <dl id="review-list"></dl>
+      <p class="hint" style="margin:0 0 6px">After you submit, you cannot edit this week. Your supervisor will be emailed to verify it.</p>
+      <p class="field-error" id="submit-error" role="alert" hidden></p>
+      <div class="actions"><button type="button" class="btn" id="confirm-submit">Confirm and Submit</button><button type="button" class="btn secondary" id="edit-again">Go Back and Edit</button></div>
+    </div>
+  </section>
+  </fieldset>
+  </form>
+
+  <section class="panel done" id="done" hidden aria-labelledby="done-title">
+    <h2 id="done-title" tabindex="-1">✓ Submission Received</h2>
+    <p>Your reference: <code id="done-ref"></code> <span class="hint">(keep this in case you contact EICC)</span></p>
+    <p id="done-status" role="status" aria-live="polite">Received and waiting to be processed. This usually takes one or two minutes.</p>
+    <div class="actions"><button type="button" class="btn secondary" id="check-status">Check Status</button><button type="button" class="btn" id="another">Submit Another Week</button></div>
+  </section>
+  <footer>Excellence Imperial Career College · Questions? Contact <a href="mailto:placement@eiccollege.ca">placement@eiccollege.ca</a>.</footer>
+</main>
+
+<script>
+const EICC_PORTAL_DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const EICC_PORTAL_LIMITS = {"name":160,"email":254,"signature":160,"summary":10000,"reason":3000,"maxWeek":52};
+function eiccPortalName_(input) {
+  // Hyphens, apostrophes, periods and accents are ignored, so "Tunde-Sule" = "Tunde Sule"
+  // and "Nuñez" = "Nunez". (The email must still match exactly.)
+  return eiccPortalCleanName_(String(input == null ? '' : input).normalize('NFKD').replace(/[̀-ͯ]/g, '')
+    .replace(/[-‐‑–—'’`.,]/g, ' ')).toLocaleLowerCase('en');
+}
+function eiccPortalCleanName_(input) {
+  return String(input == null ? '' : input).normalize('NFKC').trim().replace(/\s+/g, ' ');
+}
+function eiccPortalEmail_(input) {
+  return String(input == null ? '' : input).normalize('NFKC').trim().toLowerCase();
+}
+function eiccPortalIsEmail_(email) {
+  return email.length <= EICC_PORTAL_LIMITS.email && /^[^\s@]+@[^\s@]+\.[^\s@.]{2,}$/.test(email);
+}
+function eiccPortalDate_(s) {
+  if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const [y,m,d] = s.split('-').map(Number);
+  if (y < 2020 || y > 2100) return null;
+  const x = new Date(Date.UTC(y, m-1, d, 12));
+  return x.getUTCFullYear() === y && x.getUTCMonth() === m-1 && x.getUTCDate() === d ? x : null;
+}
+function eiccPortalISO_(d) { return d.toISOString().slice(0,10); }
+function eiccPortalAddDays_(iso, days) {
+  const d = eiccPortalDate_(iso);
+  if (!d) return '';
+  d.setUTCDate(d.getUTCDate() + days);
+  return eiccPortalISO_(d);
+}
+function eiccPortalWeekday_(iso) {
+  const d = eiccPortalDate_(iso);
+  return d ? (d.getUTCDay() + 6) % 7 : -1;
+}
+function eiccPortalMonday_(iso) {
+  const i = eiccPortalWeekday_(iso);
+  return i < 0 ? '' : eiccPortalAddDays_(iso, -i);
+}
+function eiccPortalMinutes_(value) {
+  if (typeof value !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) return null;
+  return Number(value.slice(0,2))*60 + Number(value.slice(3,5));
+}
+function eiccPortalShift_(start, end) {
+  start = String(start == null ? '' : start).trim();
+  end = String(end == null ? '' : end).trim();
+  if (!start && !end) return { empty:true, minutes:0, overnight:false, error:'', invalid:[] };
+  if (!start || !end) {
+    return { empty:false, minutes:0, overnight:false, error:'Enter both a start and an end time, or leave both blank.',
+      invalid:[start ? 'end' : 'start'] };
+  }
+  const a = eiccPortalMinutes_(start), b = eiccPortalMinutes_(end);
+  if (a === null || b === null) {
+    return { empty:false, minutes:0, overnight:false, error:'Enter valid times.',
+      invalid:[a === null ? 'start' : null, b === null ? 'end' : null].filter(Boolean) };
+  }
+  if (a === b) {
+    return { empty:false, minutes:0, overnight:false, error:'Start and end times cannot be the same.', invalid:['start','end'] };
+  }
+  const overnight = b < a;
+  return { empty:false, minutes: overnight ? b + 1440 - a : b - a, overnight, startMinutes:a,
+    endMinutes: overnight ? b + 1440 : b, error:'', invalid:[] };
+}
+function eiccPortalDuration_(minutes) {
+  return Math.floor(minutes/60) + 'h ' + String(minutes % 60).padStart(2,'0') + 'm';
+}
+function eiccPortalTime12_(hhmm) {
+  const m = eiccPortalMinutes_(hhmm);
+  if (m === null) return String(hhmm || '');
+  const h = Math.floor(m/60);
+  return (h % 12 || 12) + ':' + String(m % 60).padStart(2,'0') + ' ' + (h < 12 ? 'AM' : 'PM');
+}
+function eiccPortalCheck_(raw, options) {
+  const errors = [];
+  const add = (field, message, extra) => errors.push(Object.assign({ field, message }, extra || {}));
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    add('form', 'The submission was incomplete. Reload the page and try again.');
+    return { errors, data:null };
+  }
+  const today = options && options.today;
+  const weekNumber = Number(raw.weekNumber);
+  const lastWorkedDate = String(raw.lastWorkedDate || '').trim();
+  const zeroHourWeek = raw.zeroHourWeek === true;
+  const summary = String(raw.weeklySummary == null ? '' : raw.weeklySummary).replace(/\r\n?/g, '\n').trim();
+  const reason = String(raw.zeroHoursReason == null ? '' : raw.zeroHoursReason).replace(/\r\n?/g, '\n').trim();
+  const signature = eiccPortalCleanName_(raw.signature);
+
+  if (raw.weekNumber === '' || raw.weekNumber == null || !Number.isInteger(weekNumber) ||
+      weekNumber < 1 || weekNumber > EICC_PORTAL_LIMITS.maxWeek) {
+    add('weekNumber', 'Select your placement week number.');
+  }
+  const dateOk = Boolean(eiccPortalDate_(lastWorkedDate));
+  if (!dateOk) add('lastWorkedDate', 'Enter the date of the last day you worked.');
+
+  const rawShifts = Array.isArray(raw.shifts) && raw.shifts.length === 7 ? raw.shifts : null;
+  if (!rawShifts) add('form', 'Seven daily shift rows are required. Reload the page and try again.');
+  const weekStart = dateOk ? eiccPortalMonday_(lastWorkedDate) : '';
+  const shifts = [];
+  let totalMinutes = 0, lastDay = -1, rowErrors = 0, filled = 0;
+  for (let i = 0; i < 7; i++) {
+    const entry = rawShifts && rawShifts[i] && typeof rawShifts[i] === 'object' ? rawShifts[i] : {};
+    const start = String(entry.start == null ? '' : entry.start).trim();
+    const end = String(entry.end == null ? '' : entry.end).trim();
+    const s = eiccPortalShift_(start, end);
+    if (!s.empty) filled++;
+    if (s.error) { rowErrors++; add('shift-' + i, s.error, { inputs:s.invalid }); }
+    else if (!s.empty) { totalMinutes += s.minutes; lastDay = i; }
+    shifts.push({ day:EICC_PORTAL_DAYS[i], date: weekStart ? eiccPortalAddDays_(weekStart, i) : '',
+      start: s.empty ? '' : start, end: s.empty ? '' : end, minutes: s.error ? 0 : s.minutes,
+      overnight: Boolean(s.overnight && !s.error), _s:s });
+  }
+  // An overnight shift must finish before the next day's shift begins.
+  for (let i = 0; i < 6; i++) {
+    const a = shifts[i]._s, b = shifts[i+1]._s;
+    if (a.overnight && !a.error && !b.empty && !b.error && b.startMinutes < a.endMinutes - 1440) {
+      rowErrors++;
+      add('shift-' + (i+1), `This shift starts before your overnight ${EICC_PORTAL_DAYS[i]} shift ends (${eiccPortalTime12_(shifts[i].end)}).`, { inputs:['start'] });
+    }
+  }
+  shifts.forEach(s => delete s._s);
+
+  if (zeroHourWeek) {
+    if (filled) add('zeroHourWeek', 'You marked this as a week with no hours but also entered shift times. Clear the times, or untick this box.');
+    if (!reason) add('zeroHoursReason', 'Explain why you did not record any placement hours this week.');
+    if (dateOk && eiccPortalWeekday_(lastWorkedDate) !== 6) add('lastWorkedDate', 'For a week with no hours, choose the Sunday at the end of that week.');
+    if (dateOk && today && weekStart > today) add('lastWorkedDate', 'This week has not started yet.');
+  } else {
+    if (!filled && !rowErrors) add('shifts', 'Enter the start and end time for each day you worked, or tick "I did not work this week".');
+    if (!summary && filled) add('weeklySummary', 'Provide your summary of activities for the week.');
+    if (dateOk && today && lastWorkedDate > today) add('lastWorkedDate', 'The last day worked cannot be in the future.');
+    if (dateOk && !rowErrors && lastDay >= 0 && eiccPortalWeekday_(lastWorkedDate) !== lastDay) {
+      add('lastWorkedDate', `Your last recorded shift is on ${EICC_PORTAL_DAYS[lastDay]}` +
+        ` (${eiccPortalAddDays_(weekStart, lastDay)}), but you chose a ${EICC_PORTAL_DAYS[eiccPortalWeekday_(lastWorkedDate)]}.` +
+        ' Choose the date of your last shift, or check your daily times.');
+    }
+  }
+  if (summary.length > EICC_PORTAL_LIMITS.summary) add('weeklySummary', `Shorten your summary to ${EICC_PORTAL_LIMITS.summary} characters or fewer.`);
+  if (reason.length > EICC_PORTAL_LIMITS.reason) add('zeroHoursReason', `Shorten your reason to ${EICC_PORTAL_LIMITS.reason} characters or fewer.`);
+  if (raw.declaration !== true) add('declaration', 'Tick the box to confirm your hours and activities are accurate.');
+  if (signature.length < 2 || signature.length > EICC_PORTAL_LIMITS.signature) add('signature', 'Type your full legal name to sign.');
+
+  if (errors.length) return { errors, data:null };
+  return { errors, data: {
+    weekNumber, lastWorkedDate, weekStart, weekEnd: eiccPortalAddDays_(weekStart, 6),
+    zeroHourWeek, shifts, totalMinutes,
+    weeklySummary: zeroHourWeek ? '' : summary,
+    zeroHoursReason: zeroHourWeek ? reason : '',
+    declaration: true, signature
+  }};
+}
+</script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var DAYS = EICC_PORTAL_DAYS;
+  var FIELD_INPUT = { weekNumber:'week-number', lastWorkedDate:'last-worked', zeroHourWeek:'zero-week', zeroHoursReason:'zero-reason',
+    weeklySummary:'weekly-summary', declaration:'declaration', signature:'signature' };
+  var FIELD_ERROR = { weekNumber:'week-number-error', lastWorkedDate:'last-worked-error', zeroHourWeek:'zero-week-error',
+    zeroHoursReason:'zero-reason-error', weeklySummary:'weekly-summary-error', declaration:'declaration-error', signature:'signature-error', shifts:'shifts-error' };
+  var st = { batchId: $('batch-id').value || new URLSearchParams(location.search).get('batch') || '', today: localToday(), session: null, identity: null, resigned: false, taken: {}, touched: {}, attempted: false,
+    busy: false, requestId: newId(), receipt: null, dirty: false, corrections: [], correction: null };
+  var WEEK_MESSAGES = {
+    RECORDED: 'You have already submitted the week of {w}. Contact EICC if it needs a correction.',
+    PROCESSING: 'Your log for the week of {w} was already received and is being processed.',
+    CORRECTION: 'Your supervisor asked for a correction to the week of {w}. Use "Correct This Week" in step 1.'
+  };
+  var run = (typeof google !== 'undefined' && google.script && google.script.run) ? google.script.run : null;
+
+  function newId() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    var b = new Uint8Array(16); crypto.getRandomValues(b);
+    return Array.prototype.map.call(b, function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
+  }
+  function localToday() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function call(fn) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return new Promise(function (resolve, reject) {
+      if (!run) return reject(new Error('This page must be opened from the EICC portal link.'));
+      var r = run.withSuccessHandler(resolve).withFailureHandler(reject);
+      r[fn].apply(r, args);
+    });
+  }
+  function fmtDate(iso, opts) {
+    var d = eiccPortalDate_(iso);
+    return d ? d.toLocaleDateString('en-CA', Object.assign({ timeZone: 'UTC', month: 'short', day: 'numeric' }, opts || {})) : '';
+  }
+  function setError(inputId, errorId, message) {
+    var errEl = $(errorId);
+    errEl.textContent = message || '';
+    errEl.hidden = !message;
+    if (inputId) $(inputId).setAttribute('aria-invalid', message ? 'true' : 'false');
+  }
+  function busy(button, on, label) {
+    if (on) { button.dataset.label = button.textContent; button.textContent = label; }
+    else if (button.dataset.label) button.textContent = button.dataset.label;
+    button.disabled = on;
+  }
+  function pageError(msg) { var el = $('page-error'); el.textContent = msg; el.hidden = !msg; }
+
+  /* ---------- build static parts ---------- */
+  for (var w = 1; w <= EICC_PORTAL_LIMITS.maxWeek; w++) {
+    var o = document.createElement('option'); o.value = String(w); o.textContent = 'Week ' + w; $('week-number').appendChild(o);
+  }
+  $('day-list').innerHTML = DAYS.map(function (day, i) {
+    return '<div class="day-row" id="row-' + i + '" role="group" aria-labelledby="day-' + i + '">' +
+      '<div class="day-title"><span class="day-name" id="day-' + i + '">' + day + '</span><span class="day-date" id="date-' + i + '"></span>' +
+      '<button type="button" class="btn link row-clear" id="clear-' + i + '" hidden>Clear<span class="vh"> ' + day + ' times</span></button></div>' +
+      '<div class="day-input"><label for="start-' + i + '"><span class="vh">' + day + ' </span>Start</label>' +
+      '<input type="time" step="60" id="start-' + i + '" aria-describedby="err-' + i + '"></div>' +
+      '<div class="day-input"><label for="end-' + i + '"><span class="vh">' + day + ' </span>End</label>' +
+      '<input type="time" step="60" id="end-' + i + '" aria-describedby="err-' + i + '"></div>' +
+      '<div class="day-hours"><span id="hours-' + i + '">—</span></div>' +
+      '<p class="shift-error" id="err-' + i + '" hidden></p></div>';
+  }).join('');
+
+  /* ---------- state -> payload -> validation ---------- */
+  function payload() {
+    // A week marked "no hours" sends no shift times; any times typed earlier stay in the
+    // greyed-out rows and come back if the box is unticked.
+    var zero = $('zero-week').checked;
+    var shifts = DAYS.map(function (_, i) { return zero ? { start: '', end: '' } : { start: $('start-' + i).value, end: $('end-' + i).value }; });
+    return {
+      weekNumber: $('week-number').value ? Number($('week-number').value) : '',
+      lastWorkedDate: $('last-worked').value,
+      zeroHourWeek: $('zero-week').checked,
+      shifts: shifts,
+      weeklySummary: $('weekly-summary').value,
+      zeroHoursReason: $('zero-reason').value,
+      declaration: $('declaration').checked,
+      signature: $('signature').value,
+      correctionOf: st.correction ? st.correction.recordId : ''
+    };
+  }
+  function validate() {
+    var p = payload();
+    var result = eiccPortalCheck_(p, { today: st.today });
+    var weekStart = eiccPortalDate_(p.lastWorkedDate) ? eiccPortalMonday_(p.lastWorkedDate) : '';
+    if (st.correction && weekStart && weekStart !== st.correction.weekStart) {
+      result.errors.push({ field: 'lastWorkedDate', message: 'A correction must stay in the week of ' + fmtDate(st.correction.weekStart) + '.' });
+    } else if (weekStart && st.taken[weekStart] && !(st.correction && st.correction.weekStart === weekStart)) {
+      result.errors.push({ field: 'lastWorkedDate', message: (WEEK_MESSAGES[st.taken[weekStart]] || WEEK_MESSAGES.RECORDED).replace('{w}', fmtDate(weekStart)) });
+    }
+    return { p: p, errors: result.errors, data: result.data, weekStart: weekStart };
+  }
+  function visible(err) {
+    if (st.attempted) return true;
+    if (/^shift-\d$/.test(err.field)) return st.touched[err.field];
+    return st.touched[err.field];
+  }
+
+  /* ---------- rendering ---------- */
+  function render() {
+    var v = validate(), p = v.p, total = 0;
+    // week dates beside each day
+    $('week-range').hidden = !v.weekStart;
+    if (v.weekStart) $('week-range').textContent = 'Week of ' + fmtDate(v.weekStart) + ' – ' + fmtDate(eiccPortalAddDays_(v.weekStart, 6), { year: 'numeric' });
+    DAYS.forEach(function (_, i) {
+      $('date-' + i).textContent = v.weekStart ? fmtDate(eiccPortalAddDays_(v.weekStart, i)) : '';
+      var s = eiccPortalShift_(p.shifts[i].start, p.shifts[i].end);
+      if (!s.empty && !s.error) total += s.minutes;
+      $('hours-' + i).textContent = s.empty ? '—' : s.error ? 'Check' : eiccPortalDuration_(s.minutes);
+      $('clear-' + i).hidden = s.empty || p.zeroHourWeek;
+      var off = p.zeroHourWeek;
+      $('start-' + i).disabled = off; $('end-' + i).disabled = off;
+      $('row-' + i).classList.toggle('off', off);
+    });
+    $('weekly-total').textContent = eiccPortalDuration_(total);
+    $('zero-area').hidden = !p.zeroHourWeek;
+    $('last-worked').disabled = p.zeroHourWeek; // set to that week's Sunday when the box is ticked
+    $('shifts-panel').classList.toggle('is-off', p.zeroHourWeek);
+    $('shifts-off-note').hidden = !p.zeroHourWeek;
+    $('summary-panel').hidden = p.zeroHourWeek;
+    var len = $('weekly-summary').value.length;
+    $('summary-count').textContent = len > 4000 ? len + ' / ' + EICC_PORTAL_LIMITS.summary : '';
+
+    // field errors: first visible message per field
+    var shown = {};
+    v.errors.forEach(function (e) { if (visible(e) && !shown[e.field]) shown[e.field] = e; });
+    Object.keys(FIELD_ERROR).forEach(function (f) { setError(FIELD_INPUT[f] || null, FIELD_ERROR[f], shown[f] && shown[f].message); });
+    DAYS.forEach(function (_, i) {
+      var e = shown['shift-' + i], inputs = e ? (e.inputs && e.inputs.length ? e.inputs : ['start', 'end']) : [];
+      $('err-' + i).textContent = e ? e.message : ''; $('err-' + i).hidden = !e;
+      $('start-' + i).setAttribute('aria-invalid', inputs.indexOf('start') >= 0 ? 'true' : 'false');
+      $('end-' + i).setAttribute('aria-invalid', inputs.indexOf('end') >= 0 ? 'true' : 'false');
+    });
+    if (!$('error-summary').hidden) renderSummary(v.errors);
+    return v;
+  }
+  function targetFor(field) {
+    if (/^shift-\d$/.test(field)) return 'start-' + field.slice(6);
+    if (field === 'shifts') return 'start-0';
+    if (field === 'identity') return 'student-name';
+    return FIELD_INPUT[field] || 'week-number';
+  }
+  function renderSummary(errors) {
+    var list = $('error-list'); list.innerHTML = '';
+    errors.forEach(function (e) {
+      var li = document.createElement('li'), a = document.createElement('a');
+      var label = /^shift-\d$/.test(e.field) ? DAYS[Number(e.field.slice(6))] + ': ' : '';
+      a.href = '#' + targetFor(e.field); a.textContent = label + e.message;
+      a.addEventListener('click', function (ev) { ev.preventDefault(); var t = $(targetFor(e.field)); t.focus(); t.scrollIntoView({ block: 'center' }); });
+      li.appendChild(a); list.appendChild(li);
+    });
+    $('error-summary').hidden = errors.length === 0;
+  }
+
+  /* ---------- events: validate as the student works ---------- */
+  var form = $('placement-form');
+  form.addEventListener('input', function () { st.dirty = true; hideReview(); render(); });
+  form.addEventListener('change', function (ev) {
+    var id = ev.target.id;
+    Object.keys(FIELD_INPUT).forEach(function (f) { if (FIELD_INPUT[f] === id) st.touched[f] = true; });
+    if (id === 'zero-week' || id === 'week-number') st.touched.lastWorkedDate = st.touched.lastWorkedDate || Boolean($('last-worked').value);
+    render();
+  });
+  form.addEventListener('focusout', function (ev) {
+    var t = ev.target, m = /^(start|end)-(\d)$/.exec(t.id || '');
+    if (m) {
+      var row = $('row-' + m[2]);
+      if (!ev.relatedTarget || !row.contains(ev.relatedTarget)) { st.touched['shift-' + m[2]] = true; st.touched.lastWorkedDate = Boolean($('last-worked').value); }
+    } else {
+      Object.keys(FIELD_INPUT).forEach(function (f) { if (FIELD_INPUT[f] === t.id) st.touched[f] = true; });
+    }
+    render();
+  });
+  DAYS.forEach(function (_, i) {
+    $('clear-' + i).addEventListener('click', function () {
+      $('start-' + i).value = ''; $('end-' + i).value = ''; st.touched['shift-' + i] = false; render(); $('start-' + i).focus();
+    });
+  });
+  window.addEventListener('beforeunload', function (ev) { if (st.dirty && !st.receipt) { ev.preventDefault(); ev.returnValue = ''; } });
+
+  /* ---------- identity ---------- */
+  function identityInputs() {
+    var name = eiccPortalCleanName_($('student-name').value), email = eiccPortalEmail_($('student-email').value), ok = true;
+    setError('student-name', 'student-name-error', name.length >= 2 ? '' : 'Enter your full name as registered with EICC.');
+    setError('student-email', 'student-email-error', eiccPortalIsEmail_(email) ? '' : 'Enter a valid email address, like name@example.com.');
+    if (name.length < 2 || !eiccPortalIsEmail_(email)) ok = false;
+    return ok ? { name: name, email: email } : null;
+  }
+  function signedIn(r, id) {
+    st.session = r.sessionToken; st.identity = id; st.taken = r.takenWeeks || {}; st.corrections = r.corrections || [];
+    renderCorrections();
+    $('v-name').textContent = r.studentName;
+    $('v-detail').textContent = id.email + ' · ' + r.placementSite + ' · Supervisor: ' + r.supervisorName;
+    $('identity-entry').hidden = true; $('identity-done').hidden = false;
+    setError(null, 'identity-error', '');
+    render();
+  }
+  function signIn() {
+    setError(null, 'identity-error', '');
+    var id = identityInputs(); if (!id) return;
+    var btn = $('sign-in'); busy(btn, true, 'Checking…');
+    call('signInStudent', st.batchId, id.name, id.email).then(function (r) {
+      busy(btn, false);
+      if (!r.ok) {
+        var map = { name: ['student-name', 'student-name-error'], email: ['student-email', 'student-email-error'] }[r.field] || [null, 'identity-error'];
+        setError(map[0], map[1], r.message); return;
+      }
+      signedIn(r, id); $('verified-card').focus();
+      if (st.pendingSubmit) { st.pendingSubmit = false; $('review-button').scrollIntoView({ block: 'center' }); }
+    }, function (err) { busy(btn, false); setError(null, 'identity-error', err.message || 'Could not sign you in. Try again.'); });
+  }
+  $('sign-in').addEventListener('click', signIn);
+  ['student-name', 'student-email'].forEach(function (fid) {
+    $(fid).addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); signIn(); } });
+  });
+  $('change-identity').addEventListener('click', function () {
+    st.session = null; st.identity = null; st.taken = {}; st.corrections = []; endCorrection();
+    $('identity-done').hidden = true; $('identity-entry').hidden = false; $('student-name').focus(); render();
+  });
+
+  /* ---------- corrections requested by a supervisor ---------- */
+  function renderCorrections() {
+    var box = $('corrections'); box.innerHTML = '';
+    st.corrections.forEach(function (c) {
+      var div = document.createElement('div'); div.className = 'correction';
+      var h = document.createElement('h3'); h.textContent = 'Correction Requested: Week of ' + fmtDate(c.weekStart) + ' – ' + fmtDate(c.weekEnd, { year: 'numeric' });
+      var p = document.createElement('p'); p.style.margin = '0';
+      p.textContent = "Your Supervisor's Comments:";
+      var q = document.createElement('blockquote'); q.textContent = c.supervisorNotes || '(no comments)';
+      var hrs = document.createElement('p'); hrs.style.margin = '0 0 8px'; hrs.style.fontSize = '14px';
+      hrs.textContent = 'You reported ' + c.reportedHours + ' hours' + (c.supervisorHours != null && Math.abs(c.supervisorHours - c.reportedHours) > 0.01 ? '; your supervisor indicated ' + c.supervisorHours + ' hours.' : '.');
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'btn secondary'; b.textContent = 'Correct This Week';
+      b.addEventListener('click', function () { startCorrection(c); });
+      [h, p, q, hrs, b].forEach(function (el) { div.appendChild(el); });
+      box.appendChild(div);
+    });
+  }
+  function startCorrection(c) {
+    st.correction = c; st.requestId = newId(); st.attempted = false; st.touched = {};
+    var e = c.entry;
+    $('week-number').value = e.weekNumber ? String(e.weekNumber) : '';
+    $('last-worked').value = e.lastWorkedDate;
+    $('zero-week').checked = Boolean(e.zeroHourWeek);
+    DAYS.forEach(function (_, i) { $('start-' + i).value = e.shifts[i].start || ''; $('end-' + i).value = e.shifts[i].end || ''; });
+    $('weekly-summary').value = e.weeklySummary || ''; $('zero-reason').value = e.zeroHoursReason || '';
+    $('declaration').checked = false; $('signature').value = '';
+    $('correction-text').textContent = 'You are correcting the week of ' + fmtDate(c.weekStart) + '. Change the entries your supervisor mentioned, then sign and submit again.';
+    $('correction-banner').hidden = false;
+    hideReview(); render(); $('week-number').focus();
+  }
+  function endCorrection() { st.correction = null; $('correction-banner').hidden = true; }
+  $('cancel-correction').addEventListener('click', function () { endCorrection(); render(); });
+
+  /* A week with no hours is reported on its Sunday: the Sunday of the week already
+     chosen, otherwise the most recent Sunday (last week). The Date is then locked. */
+  $('zero-week').addEventListener('change', function () {
+    if (!this.checked) return;
+    var picked = $('last-worked').value;
+    var base = eiccPortalDate_(picked) ? picked : st.today;
+    var monday = eiccPortalMonday_(base);
+    var sunday = eiccPortalAddDays_(monday, 6);
+    if (!eiccPortalDate_(picked) && sunday > st.today) sunday = eiccPortalAddDays_(monday, -1);
+    $('last-worked').value = sunday;
+    st.touched.lastWorkedDate = true;
+    render();
+  });
+
+  /* ---------- submit ---------- */
+  function hideReview() { if (!$('review').hidden) { $('review').hidden = true; $('submit-actions').hidden = false; } }
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (st.busy) return;
+    st.attempted = true;
+    var v = render();
+    var errors = v.errors.slice();
+    if (!st.session) errors.unshift({ field: 'identity', message: 'Enter your name and email in step 1.' });
+    renderSummary(errors);
+    if (!st.session) setError(null, 'identity-error', 'Enter your name and email before submitting.');
+    if (errors.length) { $('error-summary').focus(); return; }
+    var d = v.data, days = d.shifts.filter(function (s) { return s.minutes > 0; });
+    var rows = st.correction ? [['Type', 'Correction Requested by Your Supervisor']] : [];
+    rows = rows.concat([['Week', 'Week ' + d.weekNumber + ' (' + fmtDate(d.weekStart) + ' – ' + fmtDate(d.weekEnd, { year: 'numeric' }) + ')'],
+      ['Last Day Worked', fmtDate(d.lastWorkedDate, { weekday: 'long', year: 'numeric' })],
+      ['Total Hours', d.zeroHourWeek ? 'No hours this week' : eiccPortalDuration_(d.totalMinutes) + ' over ' + days.length + ' day' + (days.length === 1 ? '' : 's')]]);
+    days.forEach(function (s) { rows.push([s.day, eiccPortalTime12_(s.start) + ' – ' + eiccPortalTime12_(s.end) + ' · ' + eiccPortalDuration_(s.minutes)]); });
+    $('review-list').innerHTML = '';
+    rows.forEach(function (r) {
+      var dt = document.createElement('dt'), dd = document.createElement('dd');
+      dt.textContent = r[0]; dd.textContent = r[1]; $('review-list').appendChild(dt); $('review-list').appendChild(dd);
+    });
+    setError(null, 'submit-error', '');
+    $('submit-actions').hidden = true; $('review').hidden = false; $('review-title').focus();
+  });
+  $('edit-again').addEventListener('click', function () { hideReview(); $('review-button').focus(); });
+  $('confirm-submit').addEventListener('click', function () {
+    var v = validate(); if (v.errors.length || st.busy) return hideReview();
+    var btn = this; st.busy = true; busy(btn, true, 'Submitting…'); $('edit-again').disabled = true;
+    call('submitStudentPlacement', st.batchId, st.session, v.p, st.requestId).then(function (r) {
+      st.busy = false; busy(btn, false); $('edit-again').disabled = false;
+      if (r.code !== 'SESSION') st.resigned = false;
+      if (r.ok) return done(r, v.weekStart);
+      if (r.code === 'SESSION') {
+        // The sign-in timed out (3 hours): sign in again with the same details, then submit.
+        var id = st.identity; st.session = null;
+        if (id && !st.resigned) {
+          st.resigned = true; st.busy = true; busy(btn, true, 'Submitting…'); $('edit-again').disabled = true;
+          return call('signInStudent', st.batchId, id.name, id.email).then(function (s) {
+            st.busy = false; busy(btn, false); $('edit-again').disabled = false;
+            if (s.ok) { signedIn(s, id); btn.click(); return; }
+            st.resigned = false; hideReview(); $('identity-done').hidden = true; $('identity-entry').hidden = false;
+            setError(null, 'identity-error', s.message); $('identity').scrollIntoView({ block: 'start' });
+          }, function (err) { st.busy = false; st.resigned = false; busy(btn, false); $('edit-again').disabled = false; setError(null, 'submit-error', err.message || 'Could not submit. Try again.'); });
+        }
+        st.resigned = false; st.pendingSubmit = true; hideReview();
+        $('identity-done').hidden = true; $('identity-entry').hidden = false;
+        setError(null, 'identity-error', r.message); $('identity').scrollIntoView({ block: 'start' }); $('sign-in').focus();
+        return;
+      }
+      if (r.errors) {
+        if (r.code === 'DUPLICATE') st.taken[v.weekStart] = 'RECORDED';
+        hideReview(); st.attempted = true; render(); renderSummary(r.errors); $('error-summary').focus(); return;
+      }
+      setError(null, 'submit-error', r.message || 'We could not accept this submission.');
+    }, function (err) {
+      st.busy = false; busy(btn, false); $('edit-again').disabled = false;
+      // The same request ID is reused, so pressing again cannot create a duplicate.
+      setError(null, 'submit-error', 'We could not confirm your submission (' + (err && err.message ? err.message : 'connection problem') +
+        '). Your entries are kept. Press "Confirm and Submit" again; it will not be counted twice.');
+    });
+  });
+  function done(r, weekStart) {
+    st.receipt = r; st.taken[weekStart] = 'PROCESSING';
+    if (st.correction) {
+      var done = st.correction.recordId;
+      st.corrections = st.corrections.filter(function (c) { return c.recordId !== done; });
+      endCorrection(); renderCorrections();
+    }
+    $('log-fields').disabled = true; $('review').hidden = true;
+    $('done-ref').textContent = r.submissionId;
+    $('done-status').textContent = 'Received and waiting to be processed. This usually takes one or two minutes.';
+    $('check-status').disabled = false;
+    $('done').hidden = false; $('done-title').focus(); $('done').scrollIntoView({ block: 'start' });
+    setTimeout(checkStatus, 75000);
+  }
+  function checkStatus() {
+    if (!st.receipt) return;
+    var btn = $('check-status'), receipt = st.receipt; busy(btn, true, 'Checking…');
+    call('checkPlacementSubmission', receipt.submissionId, receipt.statusKey).then(function (s) {
+      busy(btn, false); if (st.receipt !== receipt) return;
+      $('done-status').textContent = s.message || s.status;
+      if (s.status === 'COMPLETE' || s.status === 'REJECTED' || s.status === 'ERROR') btn.disabled = true;
+    }, function () { busy(btn, false); $('done-status').textContent = 'Could not check the status right now. Try again in a minute.'; });
+  }
+  $('check-status').addEventListener('click', checkStatus);
+  $('another').addEventListener('click', function () {
+    st.receipt = null; st.requestId = newId(); st.attempted = false; st.touched = {}; st.dirty = false;
+    ['week-number', 'last-worked', 'weekly-summary', 'zero-reason'].forEach(function (id) { $(id).value = ''; });
+    DAYS.forEach(function (_, i) { $('start-' + i).value = ''; $('end-' + i).value = ''; });
+    $('zero-week').checked = false; $('declaration').checked = false;
+    $('log-fields').disabled = false; $('done').hidden = true; $('submit-actions').hidden = false; $('error-summary').hidden = true;
+    render(); $('week-number').focus();
+  });
+
+  /* ---------- start ---------- */
+  render();
+  if (!st.batchId) { pageError('Please open the portal using the link for your placement batch (it ends with ?batch=…).'); form.hidden = true; return; }
+  call('getPortalBatchDetails', st.batchId).then(function (r) {
+    $('batch-name').textContent = r.batchName; if (r.today) st.today = r.today; render();
+  }, function (err) { pageError(err.message || 'This placement batch is unavailable. Please contact EICC.'); form.hidden = true; });
+})();
+</script>
+</body>
+</html>
