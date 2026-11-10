@@ -206,7 +206,7 @@ window.google = { script: { run: (function () {
   <!-- STEP 3: shifts (greyed out for a week with no hours) -->
   <section class="panel" aria-labelledby="hours-title" id="shifts-panel">
     <h2 id="hours-title"><span class="step" aria-hidden="true">3</span>Your Shifts</h2>
-    <p class="desc">Enter Your Start and End Times Only</p>
+    <p class="desc">Enter Your Start and End Times Only (for example 8 AM to 4:30 PM)</p>
     <p class="notice info" id="shifts-off-note" hidden>Not needed: you marked this week as having no placement hours.</p>
     <div id="shift-table">
       <div class="day-head" aria-hidden="true"><span>Day</span><span>Start Time</span><span>End Time</span><span style="text-align:right">Hours</span></div>
@@ -300,6 +300,21 @@ function eiccPortalMinutes_(value) {
   if (typeof value !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) return null;
   return Number(value.slice(0,2))*60 + Number(value.slice(3,5));
 }
+function eiccPortalTypedTime_(text) {
+  const s = String(text == null ? '' : text).toLowerCase().replace(/[\s.]/g, '');
+  const m = s.match(/^(\d{1,2})(?::?(\d{2}))?(am|pm|a|p)?$/);
+  if (!m) return { problem:'INVALID' };
+  const h = Number(m[1]), min = m[2] === undefined ? 0 : Number(m[2]);
+  if (min > 59) return { problem:'INVALID' };
+  const pad = n => String(n).padStart(2, '0');
+  if (m[3]) {
+    if (h < 1 || h > 12) return { problem:'INVALID' };
+    return { hhmm: pad(h % 12 + (m[3][0] === 'p' ? 12 : 0)) + ':' + pad(min) };
+  }
+  if (h > 23) return { problem:'INVALID' };
+  if (h >= 13 || h === 0 || (m[1].length === 2 && m[1][0] === '0')) return { hhmm: pad(h) + ':' + pad(min) };
+  return { problem:'AMPM' };
+}
 function eiccPortalShift_(start, end) {
   start = String(start == null ? '' : start).trim();
   end = String(end == null ? '' : end).trim();
@@ -310,7 +325,9 @@ function eiccPortalShift_(start, end) {
   }
   const a = eiccPortalMinutes_(start), b = eiccPortalMinutes_(end);
   if (a === null || b === null) {
-    return { empty:false, minutes:0, overnight:false, error:'Enter valid times.',
+    const ampm = [a === null ? start : null, b === null ? end : null].some(t => t !== null && eiccPortalTypedTime_(t).problem === 'AMPM');
+    return { empty:false, minutes:0, overnight:false,
+      error: ampm ? 'Add AM or PM to the time, for example 8 AM or 4:30 PM.' : 'Enter the time like 8 AM or 4:30 PM.',
       invalid:[a === null ? 'start' : null, b === null ? 'end' : null].filter(Boolean) };
   }
   if (a === b) {
@@ -466,19 +483,23 @@ function eiccPortalCheck_(raw, options) {
       '<div class="day-title"><span class="day-name" id="day-' + i + '">' + day + '</span><span class="day-date" id="date-' + i + '"></span>' +
       '<button type="button" class="btn link row-clear" id="clear-' + i + '" hidden>Clear<span class="vh"> ' + day + ' times</span></button></div>' +
       '<div class="day-input"><label for="start-' + i + '"><span class="vh">' + day + ' </span>Start</label>' +
-      '<input type="time" step="60" id="start-' + i + '" aria-describedby="err-' + i + '"></div>' +
+      '<input type="text" inputmode="text" autocomplete="off" maxlength="12" placeholder="e.g. 8 AM" id="start-' + i + '" aria-describedby="err-' + i + '"></div>' +
       '<div class="day-input"><label for="end-' + i + '"><span class="vh">' + day + ' </span>End</label>' +
-      '<input type="time" step="60" id="end-' + i + '" aria-describedby="err-' + i + '"></div>' +
+      '<input type="text" inputmode="text" autocomplete="off" maxlength="12" placeholder="e.g. 4:30 PM" id="end-' + i + '" aria-describedby="err-' + i + '"></div>' +
       '<div class="day-hours"><span id="hours-' + i + '">—</span></div>' +
       '<p class="shift-error" id="err-' + i + '" hidden></p></div>';
   }).join('');
 
   /* ---------- state -> payload -> validation ---------- */
+  // Times are typed freely ("8am", "4:30 pm", "20:30"); the payload carries HH:MM, or the
+  // typed text when it cannot be read, so the shared check can say what to fix.
+  function hhmm(typed) { var t = eiccPortalTypedTime_(typed); return t.hhmm || String(typed || '').trim(); }
+  function showTime(input) { var t = eiccPortalTypedTime_(input.value); if (t.hhmm) input.value = eiccPortalTime12_(t.hhmm); }
   function payload() {
     // A week marked "no hours" sends no shift times; any times typed earlier stay in the
     // greyed-out rows and come back if the box is unticked.
     var zero = $('zero-week').checked;
-    var shifts = DAYS.map(function (_, i) { return zero ? { start: '', end: '' } : { start: $('start-' + i).value, end: $('end-' + i).value }; });
+    var shifts = DAYS.map(function (_, i) { return zero ? { start: '', end: '' } : { start: hhmm($('start-' + i).value), end: hhmm($('end-' + i).value) }; });
     return {
       weekNumber: $('week-number').value ? Number($('week-number').value) : '',
       lastWorkedDate: $('last-worked').value,
@@ -576,6 +597,7 @@ function eiccPortalCheck_(raw, options) {
   form.addEventListener('focusout', function (ev) {
     var t = ev.target, m = /^(start|end)-(\d)$/.exec(t.id || '');
     if (m) {
+      showTime(t);
       var row = $('row-' + m[2]);
       if (!ev.relatedTarget || !row.contains(ev.relatedTarget)) { st.touched['shift-' + m[2]] = true; st.touched.lastWorkedDate = Boolean($('last-worked').value); }
     } else {
@@ -653,7 +675,7 @@ function eiccPortalCheck_(raw, options) {
     $('week-number').value = e.weekNumber ? String(e.weekNumber) : '';
     $('last-worked').value = e.lastWorkedDate;
     $('zero-week').checked = Boolean(e.zeroHourWeek);
-    DAYS.forEach(function (_, i) { $('start-' + i).value = e.shifts[i].start || ''; $('end-' + i).value = e.shifts[i].end || ''; });
+    DAYS.forEach(function (_, i) { $('start-' + i).value = e.shifts[i].start ? eiccPortalTime12_(e.shifts[i].start) : ''; $('end-' + i).value = e.shifts[i].end ? eiccPortalTime12_(e.shifts[i].end) : ''; });
     $('weekly-summary').value = e.weeklySummary || ''; $('zero-reason').value = e.zeroHoursReason || '';
     $('declaration').checked = false; $('signature').value = '';
     $('correction-text').textContent = 'You are correcting the week of ' + fmtDate(c.weekStart) + '. Change the entries your supervisor mentioned, then sign and submit again.';
