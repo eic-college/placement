@@ -53,6 +53,13 @@ legend{font-size:19px;font-weight:700;margin:0 0 12px;padding:0}
 .choice.danger strong{display:block;font-size:17px;font-weight:800;color:#b42336}
 .sb-hint{display:block;font-size:14px;color:#921d30;margin-top:3px}
 .sendback .issue{background:#fff;border-color:#f3b4bd}
+.confirm-backdrop{position:fixed;inset:0;background:rgba(6,12,44,.55);display:grid;place-items:center;padding:16px;z-index:50}
+.confirm{background:#fff;border-radius:14px;max-width:460px;width:100%;padding:22px 22px 18px;border-top:6px solid #b42336;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.confirm h2{margin:0 0 10px;font-size:21px;color:#b42336}
+.confirm p{margin:0 0 10px;font-size:16px}
+.confirm .btn{margin-top:10px}
+.btn.danger{background:#b42336}
+.btn.danger:hover{background:#921d30}
 label.lbl{display:block;font-weight:700;font-size:14px;margin:14px 0 6px}
 input.ctl,textarea{width:100%;min-height:46px;padding:10px 12px;border:1.5px solid var(--input);border-radius:9px;background:#fff}
 textarea{min-height:110px;resize:vertical}
@@ -114,10 +121,30 @@ function eiccWireReview(token) {
   var $ = function (id) { return document.getElementById(id); };
   var form = $('review-form'), issue = $('issue'), disc = $('discrepancies');
   var FIELDS = ['reviewed', 'hoursAccurate', 'activitiesAccurate', 'remarks', 'notes', 'correctedTotal', 'signature'];
+  function setSendBack(on) {
+    disc.checked = on; issue.hidden = !on; $('remarks-box').hidden = on;
+    if (on) $('notes').focus();
+  }
+  // Sending a log back makes the student redo it, so ticking the box first asks for confirmation.
+  var confirmBox = document.createElement('div');
+  confirmBox.className = 'confirm-backdrop'; confirmBox.hidden = true;
+  confirmBox.innerHTML = '<div class="confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-h" aria-describedby="confirm-text">' +
+    '<h2 id="confirm-h">Are you sure this report is wrong?</h2>' +
+    '<div id="confirm-text"><p>Only send it back if the <strong>hours or activities are not correct</strong>.</p>' +
+    '<p>The student will have to <strong>fix the report and send it again</strong>, and you will receive it <strong>to review again</strong>.</p>' +
+    '<p>If everything is correct and you just want to add a comment, choose <strong>"No, the report is correct"</strong> and use the Remarks box.</p></div>' +
+    '<button type="button" class="btn" id="confirm-no">No, the report is correct</button>' +
+    '<button type="button" class="btn danger" id="confirm-yes">Yes, send it back to the student</button></div>';
+  document.body.appendChild(confirmBox);
+  function closeConfirm(sendBack) { confirmBox.hidden = true; setSendBack(sendBack); if (!sendBack) disc.focus(); }
   disc.addEventListener('change', function () {
-    issue.hidden = !disc.checked; $('remarks-box').hidden = disc.checked;
-    if (disc.checked) $('notes').focus();
+    if (!disc.checked) return setSendBack(false);
+    disc.checked = false;
+    confirmBox.hidden = false; $('confirm-no').focus();
   });
+  $('confirm-no').addEventListener('click', function () { closeConfirm(false); });
+  $('confirm-yes').addEventListener('click', function () { closeConfirm(true); });
+  confirmBox.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeConfirm(false); });
   function show(errors) {
     var first = null;
     FIELDS.forEach(function (f) {
@@ -208,7 +235,7 @@ function eiccWireReview(token) {
       '</fieldset>' +
       '<div id="remarks-box"><label class="lbl" for="remarks">Remarks (Optional)</label>' +
       '<textarea id="remarks" maxlength="3000" aria-describedby="remarks-hint remarks-error"></textarea>' +
-      '<p class="hint" id="remarks-hint">Any feedback about the student, for example "No concerns" or "Works well with residents". Remarks are saved with the verified record and do not send the log back.</p>' +
+      '<p class="hint" id="remarks-hint">Any comments about the student.</p>' +
       '<p class="field-error" id="remarks-error" hidden></p></div>' +
       '<div class="sendback">' +
       '<label class="choice danger"><input type="checkbox" id="discrepancies" aria-controls="issue" aria-describedby="sendback-hint"><span><strong>Send Back to Student for Correction</strong>' +
