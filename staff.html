@@ -168,7 +168,15 @@ textarea.input{height:auto;min-height:84px;padding:9px 12px;resize:vertical}
 .field label{display:block;font-weight:600;color:var(--text);margin:0 0 5px;font-size:13px}
 .field .help{font-size:12px;color:var(--text-3);margin-top:4px}
 .err{color:var(--red);font-weight:500;margin:10px 0 0}
-.loading{padding:60px 0;text-align:center;color:var(--text-3)}
+.loading{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:40px 16px}
+.spinner{width:72px;height:72px;border-radius:50%;border:7px solid #d5dcf0;border-top-color:var(--brand);animation:spin .8s linear infinite}
+.loading .lt{font-size:18px;font-weight:600;color:var(--text)}
+.loading .ls{color:var(--text-2);max-width:360px}
+.loading .slow{color:var(--amber);font-weight:500}
+.btn .spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .8s linear infinite}
+.btn.sec .spin{border-color:var(--line);border-top-color:var(--brand)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner,.btn .spin{animation-duration:2.4s}}
 
 @media (max-width:900px){
   .side{display:none}
@@ -289,7 +297,15 @@ var EICC_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADgCAMAAAAKX
         return out.result;
       });
   }
-  function loading() { $('app').innerHTML = '<p class="loading">Loading…</p>'; }
+  function loading(what) {
+    $('app').innerHTML = '<div class="loading" role="status" aria-live="polite"><div class="spinner" aria-hidden="true"></div>' +
+      '<div class="lt">Loading ' + esc(what || '') + '…</div><div class="ls" id="load-sub">Please wait, this usually takes a few seconds.</div></div>';
+    clearTimeout(loading.timer);
+    loading.timer = setTimeout(function () {
+      var sub = $('load-sub');
+      if (sub) { sub.className = 'ls slow'; sub.textContent = 'Still working. Google can be slow sometimes, please keep this page open.'; }
+    }, 7000);
+  }
   function failed(err) {
     if (err && err.quiet) return;
     $('app').innerHTML = '<div class="alert error"><strong>Something went wrong.</strong> ' + esc((err && err.message) || err) +
@@ -304,7 +320,7 @@ var EICC_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADgCAMAAAAKX
   /* ---------- shell & routing ---------- */
   function start() {
     $('signin-view').hidden = true; $('shell').hidden = false;
-    loading();
+    loading('your dashboard');
     call('hello').then(function (me) {
       state.me = me;
       $('who-name').textContent = me.name; $('who-email').textContent = me.email;
@@ -349,7 +365,7 @@ var EICC_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADgCAMAAAAKX
   }
 
   /* ---------- all batches ---------- */
-  function showBatches() { loading(); call('batches').then(renderBatches).catch(failed); }
+  function showBatches() { loading('batches'); call('batches').then(renderBatches).catch(failed); }
   function renderBatches(list) {
     state.me.batches = list.filter(function (b) { return b.status === 'active'; }).map(function (b) { return b.name; });
     drawNav();
@@ -414,7 +430,7 @@ var EICC_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADgCAMAAAAKX
   /* ---------- one batch ---------- */
   function showBatch(fresh) {
     if (state.overview && !fresh) return renderBatch(state.overview);
-    loading();
+    loading(state.batch);
     call('overview', state.batch).then(function (o) { state.overview = o; renderBatch(o); }).catch(failed);
   }
   function renderBatch(o) {
@@ -512,7 +528,7 @@ var EICC_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADgCAMAAAAKX
     back.querySelector('#m-form').onsubmit = function (e) {
       e.preventDefault();
       var ok = back.querySelector('#m-ok'), err = back.querySelector('#m-err');
-      ok.disabled = true; ok.textContent = 'Working…'; err.hidden = true;
+      ok.disabled = true; ok.innerHTML = '<span class="spin" aria-hidden="true"></span>Working, please wait…'; err.hidden = true;
       Promise.resolve().then(opts.onOk).then(close, function (x) {
         ok.disabled = false; ok.textContent = opts.ok;
         if (x && x.quiet) return close();
@@ -556,7 +572,7 @@ var EICC_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADgCAMAAAAKX
   }
 
   /* ---------- student ---------- */
-  function showStudent(name) { loading(); call('student', state.batch, name).then(renderStudent).catch(failed); }
+  function showStudent(name) { loading(name); call('student', state.batch, name).then(renderStudent).catch(failed); }
   function renderStudent(s) {
     var signed = s.weeks.filter(function (w) { return w.state === 'ok'; });
     var hours = Math.round(signed.reduce(function (n, w) { return n + (Number(w.signedHours) || 0); }, 0) * 100) / 100;
@@ -598,7 +614,7 @@ var EICC_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADgCAMAAAAKX
   function openPdf(btn) {
     var win = window.open('', '_blank');
     if (win) win.document.write('<p style="font:14px system-ui;padding:20px;color:#475569">Opening the PDF…</p>');
-    btn.disabled = true; btn.textContent = 'Opening…';
+    btn.disabled = true; btn.innerHTML = '<span class="spin" aria-hidden="true"></span>Opening…';
     call('pdf', state.batch, btn.getAttribute('data-pdf')).then(function (p) {
       var bytes = atob(p.base64), arr = new Uint8Array(bytes.length);
       for (var i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
