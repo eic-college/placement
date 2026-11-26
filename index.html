@@ -52,6 +52,7 @@ textarea{min-height:150px;resize:vertical}
 .verified{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;background:var(--ok-bg);border:1px solid #bde2d0;border-radius:12px;padding:14px 16px}
 .verified strong{display:block}
 .verified span{font-size:14px;color:#2f5d55}
+.week-place{margin:8px 0 0;font-size:14px;color:#3b4254}
 .week-range{display:inline-block;margin-top:8px;background:#e8ebf5;color:#060c2c;border-radius:8px;padding:4px 10px;font-size:14px;font-weight:700}
 .check{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer}
 .check input{width:20px;height:20px;margin:2px 0 0;flex:none;accent-color:var(--brand)}
@@ -182,7 +183,7 @@ window.google = { script: { run: (function () {
     <h2 id="week-title"><span class="step" aria-hidden="true">2</span>Weekly Report</h2>
     <div id="correction-banner" class="notice info" hidden><span id="correction-text"></span> <button type="button" class="btn link" id="cancel-correction">Cancel Correction</button></div>
     <div class="grid2">
-      <div class="field"><label for="week-number">Select The Week</label>
+      <div class="field" id="week-number-field"><label for="week-number">Select The Week</label>
         <select id="week-number" aria-describedby="week-number-error"><option value="">Select Week</option></select>
         <p class="field-error" id="week-number-error" hidden></p></div>
       <div class="field zero-field">
@@ -193,7 +194,8 @@ window.google = { script: { run: (function () {
       <div class="field"><label for="last-worked">Date</label>
         <input id="last-worked" type="date" aria-describedby="last-worked-error">
         <p class="field-error" id="last-worked-error" hidden></p>
-        <span class="week-range" id="week-range" hidden></span></div>
+        <span class="week-range" id="week-range" hidden></span>
+        <p class="week-place" id="week-place" hidden></p></div>
     </div>
     <div id="zero-area" class="row-gap" hidden>
       <div class="field"><label for="zero-reason">Reason for Zero Placement Hours</label>
@@ -354,19 +356,29 @@ function eiccPortalCheck_(raw, options) {
     return { errors, data:null };
   }
   const today = options && options.today;
-  const weekNumber = Number(raw.weekNumber);
+  let weekNumber = Number(raw.weekNumber);
   const lastWorkedDate = String(raw.lastWorkedDate || '').trim();
   const zeroHourWeek = raw.zeroHourWeek === true;
   const summary = String(raw.weeklySummary == null ? '' : raw.weeklySummary).replace(/\r\n?/g, '\n').trim();
   const reason = String(raw.zeroHoursReason == null ? '' : raw.zeroHoursReason).replace(/\r\n?/g, '\n').trim();
   const signature = eiccPortalCleanName_(raw.signature);
 
-  if (raw.weekNumber === '' || raw.weekNumber == null || !Number.isInteger(weekNumber) ||
+  const dateOk = Boolean(eiccPortalDate_(lastWorkedDate));
+  if (!dateOk) add('lastWorkedDate', 'Enter the date of the last day you worked.');
+  // With a known placement start date the week number is worked out from the dates
+  // (facility and community weeks count on from the same start); otherwise the student picks it.
+  const startDate = options && eiccPortalDate_(String(options.startDate || '')) ? String(options.startDate) : '';
+  if (startDate) {
+    weekNumber = dateOk ? eiccPortalWeekFrom_(startDate, lastWorkedDate) : 0;
+    if (dateOk && weekNumber < 1) {
+      add('lastWorkedDate', `This date is before your placement started (week of ${eiccPortalMonday_(startDate)}). Check the date, or contact EICC if your start date is wrong.`);
+    } else if (dateOk && weekNumber > EICC_PORTAL_LIMITS.maxWeek) {
+      add('lastWorkedDate', 'This date is too far after your placement started. Check the date.');
+    }
+  } else if (raw.weekNumber === '' || raw.weekNumber == null || !Number.isInteger(weekNumber) ||
       weekNumber < 1 || weekNumber > EICC_PORTAL_LIMITS.maxWeek) {
     add('weekNumber', 'Select your placement week number.');
   }
-  const dateOk = Boolean(eiccPortalDate_(lastWorkedDate));
-  if (!dateOk) add('lastWorkedDate', 'Enter the date of the last day you worked.');
 
   const rawShifts = Array.isArray(raw.shifts) && raw.shifts.length === 7 ? raw.shifts : null;
   if (!rawShifts) add('form', 'Seven daily shift rows are required. Reload the page and try again.');
@@ -424,6 +436,24 @@ function eiccPortalCheck_(raw, options) {
     declaration: true, signature
   }};
 }
+function eiccPortalWeekFrom_(startIso, dateIso) {
+  const a = eiccPortalDate_(eiccPortalMonday_(startIso)), b = eiccPortalDate_(eiccPortalMonday_(dateIso));
+  if (!a || !b) return 0;
+  return Math.round((b.getTime() - a.getTime()) / (7 * 864e5)) + 1;
+}
+function eiccPortalPlacementForWeek_(placements, weekStart) {
+  const list = (placements || []).filter(p => eiccPortalDate_(String(p.start || '')))
+    .slice().sort((x, y) => (x.start < y.start ? -1 : x.start > y.start ? 1 : 0));
+  if (!list.length) return null;
+  const weekEnd = eiccPortalAddDays_(eiccPortalMonday_(weekStart), 6);
+  const started = list.filter(p => p.start <= weekEnd);
+  return started.length ? started[started.length - 1] : list[0];
+}
+function eiccPortalStartDate_(placements, batchStart) {
+  const starts = (placements || []).map(p => String(p.start || '')).filter(s => eiccPortalDate_(s)).sort();
+  if (starts.length) return starts[0];
+  return eiccPortalDate_(String(batchStart || '')) ? String(batchStart) : '';
+}
 </script>
 <script>
 (function () {
@@ -435,7 +465,8 @@ function eiccPortalCheck_(raw, options) {
   var FIELD_ERROR = { weekNumber:'week-number-error', lastWorkedDate:'last-worked-error', zeroHourWeek:'zero-week-error',
     zeroHoursReason:'zero-reason-error', weeklySummary:'weekly-summary-error', declaration:'declaration-error', signature:'signature-error', shifts:'shifts-error' };
   var st = { batchId: $('batch-id').value || new URLSearchParams(location.search).get('batch') || '', today: localToday(), session: null, identity: null, resigned: false, taken: {}, touched: {}, attempted: false,
-    busy: false, requestId: newId(), receipt: null, dirty: false, corrections: [], correction: null };
+    busy: false, requestId: newId(), receipt: null, dirty: false, corrections: [], correction: null,
+    startDate: '', placements: [] };
   var WEEK_MESSAGES = {
     RECORDED: 'You have already submitted the week of {w}. Contact EICC if it needs a correction.',
     PROCESSING: 'Your log for the week of {w} was already received and is being processed.',
@@ -501,7 +532,7 @@ function eiccPortalCheck_(raw, options) {
     var zero = $('zero-week').checked;
     var shifts = DAYS.map(function (_, i) { return zero ? { start: '', end: '' } : { start: hhmm($('start-' + i).value), end: hhmm($('end-' + i).value) }; });
     return {
-      weekNumber: $('week-number').value ? Number($('week-number').value) : '',
+      weekNumber: autoWeek() || ($('week-number').value ? Number($('week-number').value) : ''),
       lastWorkedDate: $('last-worked').value,
       zeroHourWeek: $('zero-week').checked,
       shifts: shifts,
@@ -512,9 +543,22 @@ function eiccPortalCheck_(raw, options) {
       correctionOf: st.correction ? st.correction.recordId : ''
     };
   }
+  // With a placement start date the week number is counted automatically (facility and community continue the same count).
+  function useStart(lastWorked) {
+    if (!st.startDate) return '';
+    var ws = eiccPortalDate_(lastWorked) ? eiccPortalMonday_(lastWorked) : '';
+    if (st.correction && ws && eiccPortalWeekFrom_(st.startDate, ws) < 1) return ''; // an old week before the start keeps its number
+    return st.startDate;
+  }
+  function autoWeek() {
+    var d = $('last-worked').value, start = useStart(d);
+    if (!start || !eiccPortalDate_(d)) return 0;
+    var n = eiccPortalWeekFrom_(start, d);
+    return n >= 1 ? n : 0;
+  }
   function validate() {
     var p = payload();
-    var result = eiccPortalCheck_(p, { today: st.today });
+    var result = eiccPortalCheck_(p, { today: st.today, startDate: useStart(p.lastWorkedDate) });
     var weekStart = eiccPortalDate_(p.lastWorkedDate) ? eiccPortalMonday_(p.lastWorkedDate) : '';
     if (st.correction && weekStart && weekStart !== st.correction.weekStart) {
       result.errors.push({ field: 'lastWorkedDate', message: 'A correction must stay in the week of ' + fmtDate(st.correction.weekStart) + '.' });
@@ -534,7 +578,12 @@ function eiccPortalCheck_(raw, options) {
     var v = validate(), p = v.p, total = 0;
     // week dates beside each day
     $('week-range').hidden = !v.weekStart;
-    if (v.weekStart) $('week-range').textContent = 'Week of ' + fmtDate(v.weekStart) + ' – ' + fmtDate(eiccPortalAddDays_(v.weekStart, 6), { year: 'numeric' });
+    var n = v.weekStart ? autoWeek() : 0;
+    if (v.weekStart) $('week-range').textContent = (n ? 'Week ' + n + ': ' : 'Week of ') + fmtDate(v.weekStart) + ' – ' + fmtDate(eiccPortalAddDays_(v.weekStart, 6), { year: 'numeric' });
+    var place = v.weekStart ? eiccPortalPlacementForWeek_(st.placements, v.weekStart) : null;
+    $('week-place').hidden = !place;
+    if (place) $('week-place').textContent = (place.type ? place.type + ' placement: ' : 'Placement: ') + place.site + '. This week goes to ' + place.preceptor + ' to sign.';
+    $('week-number-field').hidden = Boolean(st.startDate);
     DAYS.forEach(function (_, i) {
       $('date-' + i).textContent = v.weekStart ? fmtDate(eiccPortalAddDays_(v.weekStart, i)) : '';
       var s = eiccPortalShift_(p.shifts[i].start, p.shifts[i].end);
@@ -622,6 +671,7 @@ function eiccPortalCheck_(raw, options) {
   }
   function signedIn(r, id) {
     st.session = r.sessionToken; st.identity = id; st.taken = r.takenWeeks || {}; st.corrections = r.corrections || [];
+    st.startDate = r.startDate || ''; st.placements = r.placements || [];
     renderCorrections();
     $('v-name').textContent = r.studentName;
     $('v-detail').textContent = id.email + ' · ' + r.placementSite + ' · Supervisor: ' + r.supervisorName;
@@ -680,7 +730,7 @@ function eiccPortalCheck_(raw, options) {
     $('declaration').checked = false; $('signature').value = '';
     $('correction-text').textContent = 'You are correcting the week of ' + fmtDate(c.weekStart) + '. Change the entries your supervisor mentioned, then sign and submit again.';
     $('correction-banner').hidden = false;
-    hideReview(); render(); $('week-number').focus();
+    hideReview(); render(); (st.startDate ? $('last-worked') : $('week-number')).focus();
   }
   function endCorrection() { st.correction = null; $('correction-banner').hidden = true; }
   $('cancel-correction').addEventListener('click', function () { endCorrection(); render(); });
@@ -713,6 +763,8 @@ function eiccPortalCheck_(raw, options) {
     if (errors.length) { $('error-summary').focus(); return; }
     var d = v.data, days = d.shifts.filter(function (s) { return s.minutes > 0; });
     var rows = st.correction ? [['Type', 'Correction Requested by Your Supervisor']] : [];
+    var goesTo = eiccPortalPlacementForWeek_(st.placements, d.weekStart);
+    if (goesTo) rows.push(['Goes To', goesTo.preceptor + ' (' + goesTo.site + ')']);
     rows = rows.concat([['Week', 'Week ' + d.weekNumber + ' (' + fmtDate(d.weekStart) + ' – ' + fmtDate(d.weekEnd, { year: 'numeric' }) + ')'],
       ['Last Day Worked', fmtDate(d.lastWorkedDate, { weekday: 'long', year: 'numeric' })],
       ['Total Hours', d.zeroHourWeek ? 'No hours this week' : eiccPortalDuration_(d.totalMinutes) + ' over ' + days.length + ' day' + (days.length === 1 ? '' : 's')]]);
@@ -792,7 +844,7 @@ function eiccPortalCheck_(raw, options) {
     DAYS.forEach(function (_, i) { $('start-' + i).value = ''; $('end-' + i).value = ''; });
     $('zero-week').checked = false; $('declaration').checked = false;
     $('log-fields').disabled = false; $('done').hidden = true; $('submit-actions').hidden = false; $('error-summary').hidden = true;
-    render(); $('week-number').focus();
+    render(); (st.startDate ? $('last-worked') : $('week-number')).focus();
   });
 
   /* ---------- start ---------- */

@@ -138,6 +138,16 @@ textarea.input{height:auto;min-height:84px;padding:9px 12px;resize:vertical}
 .tl li:last-child:after{display:none}
 .tl li.now:before{border-color:var(--brand);background:var(--brand)}
 .tl .when{font-size:12px;color:var(--text-3)}
+.pl{list-style:none;margin:0;padding:4px 16px}
+.pl li{padding:12px 0;border-bottom:1px solid var(--line-2)}
+.pl li:last-child{border-bottom:0}
+.pl .top{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 4px}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:var(--line-2);color:var(--text-2)}
+.tag.fac{background:#e7ecfb;color:#2f4ab3}.tag.com{background:#e6f4ec;color:#1d6b3f}.tag.now{background:var(--brand);color:#fff}.tag.soon{background:#fff4dc;color:#8a5a00}
+.pl .row-actions{display:flex;gap:6px;margin-top:8px}
+.foot-note{font-size:12px;color:var(--text-3);padding:0 16px 14px;margin:0}
+.warn-line{font-size:12px;color:#8a5a00;margin-top:2px}
+select.input{appearance:auto}
 .notes{padding:12px 16px 16px;white-space:pre-wrap;color:var(--text-2);font-size:13px}
 .banner{border:1px solid var(--line);background:#fff;border-radius:var(--radius);padding:10px 14px;margin:0 0 16px;color:var(--text-2)}
 .banner b{color:var(--text)}
@@ -504,7 +514,19 @@ var EICC_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADgCAMAAAAKX
     $('tab-body').innerHTML = '<div class="card"><div class="section-title">Student link</div><div style="padding:14px 16px">' +
       '<p class="note">Students open this link to submit their weekly hours. Share it with every student in this batch.</p>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap"><input class="input" id="student-link" readonly value="' + esc(o.studentLink) + '" style="flex:1;min-width:220px">' +
-      '<button type="button" class="btn sec" id="copy-link">Copy link</button></div></div></div>';
+      '<button type="button" class="btn sec" id="copy-link">Copy link</button></div></div></div>' +
+      '<div class="card" style="margin-top:16px"><div class="section-title">Placement start date</div><div style="padding:14px 16px">' +
+      '<p class="note">Week 1 is the week this date falls in. Week numbers then count on by the calendar through facility and community placements, ' +
+      'so students no longer pick a week number. A student with their own placement dates counts from their own first start date.</p>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><input class="input" type="date" id="start-date" value="' + esc(o.startDate || '') + '" style="max-width:220px">' +
+      '<button type="button" class="btn" id="save-start">Save date</button></div></div></div>';
+    $('save-start').onclick = function () {
+      var b = $('save-start'), d = $('start-date').value;
+      if (!d) { toast('Please choose a date first.'); return; }
+      b.disabled = true; b.innerHTML = '<span class="spin" aria-hidden="true"></span>Saving…';
+      call('setStartDate', state.batch, d).then(function (fresh) { state.overview = fresh; toast('Placement start date saved.'); renderBatch(fresh); })
+        .catch(function (e) { b.disabled = false; b.textContent = 'Save date'; if (!e || !e.quiet) toast((e && e.message) || 'Could not save.'); });
+    };
     $('copy-link').onclick = function () {
       var done = function () { toast('Student link copied.'); };
       if (navigator.clipboard) navigator.clipboard.writeText(o.studentLink).then(done, function () { $('student-link').select(); });
@@ -544,7 +566,13 @@ var EICC_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADgCAMAAAAKX
         : '<input class="input" id="' + id + '" type="' + (type || 'text') + '" value="' + esc(value) + '" autocomplete="off">') +
       (help ? '<div class="help">' + esc(help) + '</div>' : '') + '</div>';
   }
+  function choice(id, label, value, options, help) {
+    return '<div class="field"><label for="' + id + '">' + esc(label) + '</label><select class="input" id="' + id + '">' +
+      options.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === value ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') +
+      '</select>' + (help ? '<div class="help">' + esc(help) + '</div>' : '') + '</div>';
+  }
   var val = function (id) { return document.getElementById(id).value; };
+  var TYPES = [['Facility', 'Facility placement'], ['Community', 'Community placement']];
 
   function remind(email, who, count) {
     modal({ title: 'Send a reminder?', ok: 'Send reminder',
@@ -562,10 +590,12 @@ var EICC_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADgCAMAAAAKX
     modal({ title: 'Add a student', ok: 'Add student',
       body: '<p>The student signs in with exactly this name and email, so please check the spelling.</p>' +
         field('a-name', 'Full name', '') + field('a-email', 'Email', '', 'email') + field('a-id', 'Student ID', '') +
-        field('a-site', 'Placement / facility', '') + field('a-pname', 'Preceptor name', '') + field('a-pemail', 'Preceptor email', '', 'email'),
+        choice('a-type', 'Placement type', 'Facility', TYPES) +
+        field('a-site', 'Placement / facility', '') + field('a-pname', 'Preceptor name', '') + field('a-pemail', 'Preceptor email', '', 'email') +
+        field('a-start', 'Placement start date', (state.overview && state.overview.startDate) || '', 'date', 'Week 1 is the week of this date.'),
       onOk: function () {
         return call('addStudent', state.batch, { name: val('a-name'), email: val('a-email'), studentId: val('a-id'), site: val('a-site'),
-          preceptorName: val('a-pname'), preceptorEmail: val('a-pemail') }).then(function (o) {
+          preceptorName: val('a-pname'), preceptorEmail: val('a-pemail'), type: val('a-type'), start: val('a-start') }).then(function (o) {
           state.overview = o; state.tab = 'students'; renderBatch(o); toast('Student added.');
         });
       } });
@@ -578,37 +608,88 @@ var EICC_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAADgCAMAAAAKX
     var hours = Math.round(signed.reduce(function (n, w) { return n + (Number(w.signedHours) || 0); }, 0) * 100) / 100;
     var html = '<div class="head"><div>' + crumbs([{ text: 'Batches', href: '#' }, { text: s.batch, href: hashFor(s.batch) }, { text: s.name }]) +
       '<h1>' + esc(s.name) + '</h1><p class="meta">' + esc(plural(s.weeks.length, 'weekly report')) + ' · ' + esc(hours) + ' hours signed</p></div>' +
-      '<div class="actions"><button type="button" class="btn sec" id="change">Change placement</button></div></div>';
+      '<div class="actions"><button type="button" class="btn" id="add-placement">Add placement</button></div></div>';
     html += '<div class="split"><div class="card"><div class="section-title">Weekly reports</div>' + (s.weeks.length ?
       '<table class="table stack"><thead><tr><th>Week</th><th class="r">Hours</th><th>Status</th><th>Preceptor comments</th><th></th></tr></thead><tbody>' +
       s.weeks.map(function (w) {
         return '<tr><td data-l="Week"><div class="strong">Week ' + esc(w.week) + '</div><div class="muted">' + esc(w.dates) + '</div></td>' +
           '<td data-l="Hours" class="r num">' + esc(w.hours) + (w.signedHours !== '' && w.signedHours !== w.hours ? '<div class="muted">signed ' + esc(w.signedHours) + '</div>' : '') + '</td>' +
-          '<td data-l="Status"><span class="status ' + w.state + '">' + esc(w.status) + '</span><div class="muted">' + esc(w.signedOn ? w.preceptor + ', ' + w.signedOn : w.preceptor) + '</div></td>' +
+          '<td data-l="Status"><span class="status ' + w.state + '">' + esc(w.status) + '</span><div class="muted">' + esc(w.signedOn ? w.preceptor + ', ' + w.signedOn : w.preceptor) + '</div>' +
+          (w.otherPreceptor ? '<div class="warn-line">Signed by a different preceptor than this week\'s placement (' + esc(w.otherPreceptor) + ').</div>' : '') + '</td>' +
           '<td data-l="Comments">' + (w.comments ? esc(w.comments) : '<span class="faint">—</span>') + '</td>' +
-          '<td data-l="" class="r">' + (w.hasPdf ? '<button type="button" class="btn sec sm" data-pdf="' + esc(w.recordId) + '">View PDF</button>' : '') + '</td></tr>';
+          '<td data-l="" class="r">' + (w.hasPdf ? '<button type="button" class="btn sec sm" data-pdf="' + esc(w.recordId) + '">View PDF</button>' :
+            w.pdfPending ? '<span class="muted">PDF being updated, check back in a few minutes</span>' : '') + '</td></tr>';
       }).join('') + '</tbody></table>' : '<div class="empty"><b>No reports yet</b>Weeks appear here once the student submits them.</div>') + '</div>';
     html += '<div style="display:grid;gap:16px"><div class="card"><div class="section-title">Details</div><dl class="dl">' +
       '<div><dt>Email</dt><dd>' + esc(s.email) + '</dd></div><div><dt>Student ID</dt><dd>' + esc(s.id) + '</dd></div>' +
-      '<div><dt>Placement</dt><dd>' + esc(s.site) + '</dd></div>' +
-      '<div><dt>Preceptor</dt><dd>' + esc(s.preceptor) + '<div class="muted">' + esc(s.preceptorEmail) + '</div></dd></div></dl></div>' +
+      '</dl></div>' + placementsCard(s) +
       '<div class="card"><div class="section-title">Placement history</div>' + (s.history.length ? '<ul class="tl">' + s.history.slice().reverse().map(function (h, i) {
         return '<li class="' + (i === 0 ? 'now' : '') + '"><div class="strong">' + esc(h.site) + '</div><div class="muted">' + esc(h.preceptor) + ' · ' + esc(h.preceptorEmail) + '</div>' +
           '<div class="when">' + esc(i === 0 ? 'Current · ' : '') + esc(h.change) + ', ' + esc(h.when) + (h.note ? ' · ' + esc(h.note) : '') + '</div></li>';
       }).join('') + '</ul>' : '<div class="empty">No history recorded yet.</div>') + '</div>' +
       (s.notes ? '<div class="card"><div class="section-title">Notes</div><div class="notes">' + esc(s.notes) + '</div></div>' : '') + '</div></div>';
     $('app').innerHTML = html;
-    $('change').onclick = function () { changePlacement(s); };
+    $('add-placement').onclick = function () { editPlacement(s, null); };
+    all('[data-edit-pl]').forEach(function (b) { b.onclick = function () { editPlacement(s, s.placements[Number(b.getAttribute('data-edit-pl'))]); }; });
+    all('[data-remove-pl]').forEach(function (b) { b.onclick = function () { removePlacement(s, s.placements[Number(b.getAttribute('data-remove-pl'))]); }; });
     all('[data-pdf]').forEach(function (b) { b.onclick = function () { openPdf(b); }; });
   }
-  function changePlacement(s) {
-    modal({ title: 'Change placement', ok: 'Save placement',
-      body: '<p>Use this when <strong>' + esc(s.name) + '</strong> moves to a new facility or gets a new preceptor. Weeks already submitted stay with their old preceptor, and the old placement stays in the history.</p>' +
-        field('c-site', 'Placement / facility', s.site) + field('c-pname', 'Preceptor name', s.preceptor) +
-        field('c-pemail', 'Preceptor email', s.preceptorEmail, 'email') + field('c-note', 'Reason (optional)', '', 'area', 'For example: community placement starts Nov 9.'),
+  function placementsCard(s) {
+    var head = '<div class="section-title">Placements</div>';
+    if (!s.placements.length) {
+      return '<div class="card">' + head + '<ul class="pl"><li><div class="top"><span class="tag now">Now</span></div><div class="strong">' + esc(s.site) + '</div>' +
+        '<div class="muted">' + esc(s.preceptor) + ' · ' + esc(s.preceptorEmail) + '</div></li></ul>' +
+        '<p class="foot-note">Add the community placement (or a new facility) with its start date, and each week\'s report goes to the right preceptor.</p></div>';
+    }
+    return '<div class="card">' + head + '<ul class="pl">' + s.placements.map(function (p, i) {
+      var dates = 'From ' + p.startLabel + (p.endLabel ? ' to ' + p.endLabel : '');
+      return '<li><div class="top"><span class="tag ' + (p.type === 'Community' ? 'com' : 'fac') + '">' + esc(p.type) + '</span>' +
+        (p.current ? '<span class="tag now">Now</span>' : p.upcoming ? '<span class="tag soon">Upcoming</span>' : '') + '</div>' +
+        '<div class="strong">' + esc(p.site) + '</div><div class="muted">' + esc(p.preceptor) + ' · ' + esc(p.preceptorEmail) + '</div>' +
+        '<div class="muted">' + esc(dates) + '</div>' + (p.note ? '<div class="muted">' + esc(p.note) + '</div>' : '') +
+        '<div class="row-actions"><button type="button" class="btn sec sm" data-edit-pl="' + i + '">Edit</button>' +
+        (s.placements.length > 1 ? '<button type="button" class="btn sec sm" data-remove-pl="' + i + '">Remove</button>' : '') + '</div></li>';
+    }).join('') + '</ul>' +
+      (s.startDate ? '<p class="foot-note">Week 1 is the week of ' + esc(s.placements[0].startLabel) + '. Weeks count on through every placement.</p>' : '') + '</div>';
+  }
+  function placementSummary(r) {
+    var parts = [];
+    if (r.moved.length) {
+      var to = r.moved.map(function (m) { return m.to; }).filter(function (x, i, l) { return l.indexOf(x) === i; });
+      parts.push(plural(r.moved.length, 'waiting report') + ' sent to ' + to.join(', ') + '.');
+    }
+    if (r.renumbered.length) parts.push(plural(r.renumbered.length, 'week number') + ' corrected.');
+    if (r.signedElsewhere.length) parts.push(plural(r.signedElsewhere.length, 'signed week') + ' were signed by a different preceptor; they are marked below.');
+    return parts.join(' ');
+  }
+  function editPlacement(s, p) {
+    var isNew = !p;
+    var guessType = isNew ? (s.placements.some(function (x) { return x.type === 'Community'; }) ? 'Facility' : 'Community') : p.type;
+    modal({ title: isNew ? 'Add a placement' : 'Edit placement', ok: isNew ? 'Add placement' : 'Save changes',
+      body: (isNew ? '<p>Add <strong>' + esc(s.name) + '</strong>\'s community placement, or a new facility if they had to move. ' +
+        'Their earlier placement stays on record.</p>' : '<p>Fix the details of this placement for <strong>' + esc(s.name) + '</strong>.</p>') +
+        choice('p-type', 'Placement type', guessType, TYPES) +
+        field('p-site', 'Placement / facility', p ? p.site : '') +
+        field('p-pname', 'Preceptor name', p ? p.preceptor : '') +
+        field('p-pemail', 'Preceptor email', p ? p.preceptorEmail : '', 'email') +
+        field('p-start', 'Start date', p ? p.start : '', 'date', 'Weekly reports from this week on go to this preceptor.') +
+        field('p-end', 'End date (optional)', p ? p.end : '', 'date') +
+        field('p-note', 'Note (optional)', p ? p.note : '', 'area', 'For example: moved because of a scheduling problem.') +
+        '<p class="help" style="margin-top:12px">When you save, any reports still waiting for a signature are sent to the right preceptor for their week, ' +
+        'and week numbers are corrected. Signed weeks keep their signature.</p>',
       onOk: function () {
-        return call('changePlacement', state.batch, s.name, { site: val('c-site'), preceptorName: val('c-pname'), preceptorEmail: val('c-pemail'), note: val('c-note') })
-          .then(function (updated) { state.overview = null; renderStudent(updated); toast('Placement saved. New weeks will go to ' + updated.preceptor + '.'); });
+        return call('savePlacement', state.batch, s.name, { row: p ? p.row : '', type: val('p-type'), site: val('p-site'), preceptorName: val('p-pname'),
+          preceptorEmail: val('p-pemail'), start: val('p-start'), end: val('p-end'), note: val('p-note') })
+          .then(function (out) { state.overview = null; renderStudent(out.student); toast(('Placement saved. ' + placementSummary(out.result)).trim()); });
+      } });
+  }
+  function removePlacement(s, p) {
+    modal({ title: 'Remove this placement?', ok: 'Remove placement', danger: true,
+      body: '<p>This removes <strong>' + esc(p.type + ': ' + p.site) + '</strong> (' + esc(p.preceptor) + ') from ' + esc(s.name) + '\'s placements. ' +
+        'Only do this if it was added by mistake. Reports still waiting go to the preceptor of the remaining placement for their week.</p>',
+      onOk: function () {
+        return call('removePlacement', state.batch, s.name, p.row)
+          .then(function (out) { state.overview = null; renderStudent(out.student); toast(('Placement removed. ' + placementSummary(out.result)).trim()); });
       } });
   }
   function openPdf(btn) {
